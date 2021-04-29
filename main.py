@@ -24,24 +24,96 @@ change = True
 game_clock = pygame.time.Clock()
 tick_counter_60 = 0
 
-# player
-player_ship = pygame.image.load('vis/player_01.png')
-player_x, player_y = 640, 600
-player_x_offset, player_y_offset = 16, 16
-left_arrow = right_arrow = up_arrow = down_arrow = False
-x_vel, y_vel = 5, 5
-mov_block_x = mov_block_y = False
-
 # background
 background = pygame.image.load('vis/stars_1.png')
 
 # the ENEMY
 enemy_pigeon_1 = pygame.image.load('vis/pigeon_01.png')
+enemy_x_offset, enemy_y_offset = 16, 16
+eenemy_1_x_vel, enemy_2_y_vel = 3, 3
 
+
+
+# classes
+class Entity:
+    def __init__(self, name, hp, image, x_pos, y_pos, x_vel, y_vel,
+                x_offset, y_offset, moved):
+        self.name = name
+        self.hp = hp
+        self.x_pos = x_pos
+        self.y_pos = y_pos
+        self.x_vel = x_vel
+        self.y_vel = y_vel
+        self.image = image
+        self.x_offset = x_offset
+        self.y_offset = y_offset
+        self.moved = moved
+
+
+    def move(self, left, right, up, down):
+        if left:
+            self.x_pos -= self.x_vel
+            self.moved = 0
+
+        if right:
+            self.x_pos += self.x_vel
+            self.moved = 1
+
+        if up:
+            self.y_pos -= self.y_vel
+            self.moved = 2
+
+        if down:
+            self.y_pos += self.y_vel
+            self.moved = 3
+
+        if not left and not right and not up and not down:
+            self.moved = 4
+
+
+"""
+    def border_stop(self, left_lim, right_lim, up_lim, down_lim):
+        if self.x_pos < left_lim:
+            self.x_pos += self.x_vel
+            self.moved = True
+        elif self.x_pos > right_lim:
+            self.x_pos -= self.x_vel
+            self.moved = True
+
+
+        if self.y_pos < up_lim:
+            self.y_pos += self.y_vel
+            self.moved = True
+        elif self.y_pos > down_lim:
+            self.y_pos -= self.y_vel
+            self.moved = True
+"""
 # functions
 def entity_update(entity_img, ent_x, ent_y):
     screen.blit(entity_img, (ent_x, ent_y))
 
+def border_detect(Entity, left_lim, right_lim, up_lim, down_lim):
+    if Entity.x_pos < left_lim:
+        Entity.move(False, True, False, False)
+    elif Entity.x_pos > right_lim:
+        Entity.move(True, False, False, False)
+
+
+    if Entity.y_pos < up_lim:
+        Entity.move(False, False, False, True)
+    elif Entity.y_pos > down_lim:
+        Entity.move(False, False, True, False)
+
+# object creation
+# player
+left_arrow = right_arrow = up_arrow = down_arrow = False
+
+player = Entity('player', 3,
+                  pygame.image.load('vis/player_01.png'),
+                  540, 500,
+                  5, 5,
+                  16, 16,
+                  0)
 
 # game loop
 while game_running:
@@ -73,31 +145,16 @@ while game_running:
         # ------------------------
 
     # player movement
-    if left_arrow:
-        player_x -= x_vel
-        change = True
-    if right_arrow:
-        player_x += x_vel
-        change = True
-    if up_arrow:
-        player_y -= y_vel
-        change = True
-    if down_arrow:
-        player_y += y_vel
-        change = True
+    player.move(left_arrow, right_arrow, up_arrow, down_arrow)
 
-    if player_x < 80:
-        player_x += x_vel
-    elif player_x > 1200:
-        player_x -= x_vel
+    # player border stops
+    border_detect(player, 80, 1200, 80, 640)
     # -------------------
 
-    # player wall bounds
-    if player_y < 80:
-        player_y += y_vel
-    elif player_y > 640:
-        player_y -= y_vel
-    # -------------------
+    # change checks
+    if player.moved < 4:
+        change = True
+    # ---------------
 
 # game clock idk
 
@@ -113,9 +170,13 @@ while game_running:
 # update
 
     # draw
+    print(change, player.moved)
     if change:
         entity_update(background, 0, 0)
-        entity_update(player_ship, player_x - player_x_offset, player_y - player_y_offset)
+
+        entity_update(player.image,
+                      player.x_pos - player.x_offset,
+                      player.y_pos - player.y_offset)
         pygame.display.flip()
         change = False
 
