@@ -1,5 +1,6 @@
 import pygame
 from random import randint
+#import fun
 
 # CONSTANTS
 TITLE_ = "Pigeon Hunter I"
@@ -13,20 +14,33 @@ game_running = True
 pygame.init()
 screen = pygame.display.set_mode(SCREEN_SIZE)
 pygame.display.set_caption(TITLE_)
+icon = pygame.image.load('vis/icon.png')
+pygame.display.set_icon(icon)
 
-    # game clock
+# game control variables
+change = True
+
+# game clock
 game_clock = pygame.time.Clock()
+tick_counter_60 = 0
 
 # player
-player_crosshair = pygame.image.load('vis/crosshair.png')
-player_crosshair_offset_x = -32;
-player_crosshair_offset_y = -32;
+player_ship = pygame.image.load('vis/player_01.png')
+player_x, player_y = 640, 600
+player_x_offset, player_y_offset = 16, 16
+left_arrow = right_arrow = up_arrow = down_arrow = False
+x_vel, y_vel = 5, 5
+mov_block_x = mov_block_y = False
 
 # background
-background = pygame.image.load('vis/minsk.png')
+background = pygame.image.load('vis/stars_1.png')
 
 # the ENEMY
 enemy_pigeon_1 = pygame.image.load('vis/pigeon_01.png')
+
+# functions
+def entity_update(entity_img, ent_x, ent_y):
+    screen.blit(entity_img, (ent_x, ent_y))
 
 
 # game loop
@@ -36,18 +50,75 @@ while game_running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
                 game_running = False
+        # Keys pressed
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_LEFT:
+                left_arrow = True
+            if event.key == pygame.K_RIGHT:
+                right_arrow = True
+            if event.key == pygame.K_UP:
+                up_arrow = True
+            if event.key == pygame.K_DOWN:
+                down_arrow = True
+        # Keys unpressed
+        if event.type == pygame.KEYUP:
+            if event.key == pygame.K_LEFT:
+                left_arrow = False
+            if event.key == pygame.K_RIGHT:
+                right_arrow = False
+            if event.key == pygame.K_UP:
+                up_arrow = False
+            if event.key == pygame.K_DOWN:
+                down_arrow = False
+        # ------------------------
 
-    mouse_x, mouse_y = pygame.mouse.get_pos()
+    # player movement
+    if left_arrow:
+        player_x -= x_vel
+        change = True
+    if right_arrow:
+        player_x += x_vel
+        change = True
+    if up_arrow:
+        player_y -= y_vel
+        change = True
+    if down_arrow:
+        player_y += y_vel
+        change = True
 
+    if player_x < 80:
+        player_x += x_vel
+    elif player_x > 1200:
+        player_x -= x_vel
+    # -------------------
 
+    # player wall bounds
+    if player_y < 80:
+        player_y += y_vel
+    elif player_y > 640:
+        player_y -= y_vel
+    # -------------------
 
-    # update
+# game clock idk
+
+    # game clock stuff
+    game_clock.tick(58)
+    if tick_counter_60 < 60:
+        tick_counter_60 += 1
+    else:
+        print(game_clock.get_fps())
+        tick_counter_60 = 0
+    # ---------------------
+
+# update
 
     # draw
-    screen.blit(background, (0, 0))
-    screen.blit(player_crosshair, (mouse_x + player_crosshair_offset_x,
-                                   mouse_y + player_crosshair_offset_y))
-    pygame.display.flip()
+    if change:
+        entity_update(background, 0, 0)
+        entity_update(player_ship, player_x - player_x_offset, player_y - player_y_offset)
+        pygame.display.flip()
+        change = False
+
 
 # exit
 pygame.quit()
