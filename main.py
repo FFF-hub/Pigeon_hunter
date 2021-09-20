@@ -1,4 +1,5 @@
 import pygame
+import fun
 from pygame.locals import *
 from random import randint
 #import fun
@@ -21,8 +22,6 @@ pygame.display.set_icon(icon)
 # game control variables
 GAME_RUNNING = True
 change = True
-SCORE = 0
-ENEMY_COUNTER = 0
 CURRENT_LEVEL = 0
 NEXT_LEVEL = False
 
@@ -32,13 +31,6 @@ tick_counter_60 = 0
 
 # background
 background = pygame.image.load('vis/stars_1.png')
-
-# the ENEMY
-enemy_pigeon_1 = pygame.image.load('vis/pigeon_01.png')
-enemy_x_offset, enemy_y_offset = 16, 16
-eenemy_1_x_vel, enemy_2_y_vel = 3, 3
-
-
 
 # classes
 # space ship
@@ -79,13 +71,12 @@ class Player(pygame.sprite.Sprite):
             # Q - default GUN
 		if key[pygame.K_q] and time_now - self.last_shot > self.cooldown:
 			bullet = Bullet01(self.rect.centerx, self.rect.top, 8, 1)
-			bullet_group.add(bullet)
+			fun.bullet_group.add(bullet)
 			self.last_shot = time_now
 
 		if self.hp <= 0:
 			self.kill()
-
-#Bullet01
+			
 class Bullet01(pygame.sprite.Sprite):
     def __init__(self, x_pos, y_pos, y_vel, x_vel):
         pygame.sprite.Sprite.__init__(self)
@@ -107,50 +98,13 @@ class Bullet01(pygame.sprite.Sprite):
         if self.rect.bottom < 0:
             self.kill()
 
-
-#Pigeons
-class Pigeon01(pygame.sprite.Sprite):
-    def __init__(self, x_pos, y_pos):
-        pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load('vis/pigeon_01.png')
-        self.rect = self.image.get_rect()
-        self.rect.center = [x_pos, y_pos]
-
-        global ENEMY_COUNTER			#zliczanie przeciwnikow
-        ENEMY_COUNTER += 1
-        self.move_steps = 100
-        self.move_counter = 0		#aka licznik krokow obiektu
-        self.move_direction = 1
-        self.hp = 1
-        self.x_vel = 1				#musi byc Int !!! inaczej sie jebie
-        self.y_step = 10			#liczba pikseli kroku w dol
-
-    def update(self):
-        self.rect.x += self.x_vel * self.move_direction
-        self.move_counter += self.x_vel
-        if abs(self.move_counter) > self.move_steps:
-            self.move_direction *= -1
-            self.move_counter *= self.move_direction
-        if pygame.sprite.spritecollide(self, bullet_group, True):
-            self.hp -= 1
-        if self.hp <= 0:
-            self.kill()
-            global ENEMY_COUNTER, SCORE
-            ENEMY_COUNTER -= 1
-            SCORE += 1
-
-#sprite groups
-player_group = pygame.sprite.Group()
-bullet_group = pygame.sprite.Group()
-enemies_group = pygame.sprite.Group()
-
 #enemy creator
 def create_enemies(enemy_type, rows, cols, x_dis, y_dis, x_buf, y_buf):
 	# x_buf/y_buf - odpowiadaja za odstep od krawedzi ekranu (x/y)
     for row in range(rows):
         for item in range(cols):
             enemy = enemy_type(x_buf + item * x_dis, y_buf + row * y_dis)
-            enemies_group.add(enemy)
+            fun.enemies_group.add(enemy)
 
 #level creator function
 # enemies = [pigeon01, pigeon02, ..., pigeonN]
@@ -170,13 +124,13 @@ def create_level(enemies, arrangement, ):
 # Level zero
 player = Player('player', 3, int(SCREEN_SIZE[0] / 2), SCREEN_SIZE[1] - 200,
                 5, 750)
-player_group.add(player)
+fun.player_group.add(player)
 
 #create enemies
-level_00_enemies = [Pigeon01]
-level_00_geo = [[5, 5, 120, 80, 350, 100]]
+level_00_enemies = [fun.Pigeon02]
+level_00_geo = [[2, 2, 120, 80, 350, 100]]
 
-level_01_enemies = [Pigeon01, Pigeon01]
+level_01_enemies = [fun.Pigeon01, fun.Pigeon01]
 level_01_geo = [[5, 5, 60, 40, 200, 100],
 				[5, 5, 60, 40, 750, 350]]
 
@@ -200,16 +154,19 @@ while GAME_RUNNING:
 	player.update()
 
     # Bullet01s update
-	bullet_group.update()
+	fun.bullet_group.update()
 
     # Enemies update
-	enemies_group.update()
+	fun.enemies_group.update()
+	
+	# Enemy bullet groups update
+	fun.enemy_bullet_group.update()
     
     # level end condition
-	if ENEMY_COUNTER <= 0:
+	if fun.ENEMY_COUNTER <= 0:
 		NEXT_LEVEL = True
 		print("CONGRATULATIONS: you have completed first encounter!")
-		print("SCORE: ", SCORE)
+		print("fun.SCORE: ", fun.SCORE)
 		# level creation function here
 		# position of player with data from previous lvl
 		# new locations of enemies
@@ -234,7 +191,7 @@ while GAME_RUNNING:
 		tick_counter_60 += 1
 	else:
 		print(game_clock.get_fps())
-		print("pozostalo: ", ENEMY_COUNTER)
+		print("pozostalo: ", fun.ENEMY_COUNTER)
 		tick_counter_60 = 0
         
     # -----------------
@@ -244,10 +201,11 @@ while GAME_RUNNING:
 	screen.blit(background, (0, 0))
 
     # player & bullets
-	player_group.draw(screen)
-	bullet_group.draw(screen)
+	fun.player_group.draw(screen)
+	fun.bullet_group.draw(screen)
     # enemies
-	enemies_group.draw(screen)
+	fun.enemies_group.draw(screen)
+	fun.enemy_bullet_group.draw(screen)
     # draw
 	pygame.display.update()
 
