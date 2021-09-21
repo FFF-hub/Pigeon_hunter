@@ -127,7 +127,7 @@ player = Player('player', 3, int(SCREEN_SIZE[0] / 2), SCREEN_SIZE[1] - 200,
 fun.player_group.add(player)
 
 #create enemies
-level_00_enemies = [fun.Pigeon02]
+level_00_enemies = [fun.Pigeon03]
 level_00_geo = [[2, 2, 120, 80, 350, 100]]
 
 level_01_enemies = [fun.Pigeon01, fun.Pigeon01]
