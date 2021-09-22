@@ -4,6 +4,9 @@ from random import randint
 
 
 #variables
+SCREEN_SIZE = (1200, 720)
+AI_SC_SIZE = (SCREEN_SIZE[0]//10, SCREEN_SIZE[0]//10)
+
 ENEMY_COUNTER = 0
 SCORE = 0
 
@@ -13,7 +16,81 @@ bullet_group = pygame.sprite.Group()
 enemy_bullet_group = pygame.sprite.Group()
 enemies_group = pygame.sprite.Group()
 
+########################################################################
+#Player stuff
+########################################################################
+class Player(pygame.sprite.Sprite):
+	def __init__(self, name, hp, x_pos, y_pos, vel, cooldown):
+		pygame.sprite.Sprite.__init__(self)
+		self.image = pygame.image.load('vis/player_01.png')
+		self.rect = self.image.get_rect()
+		self.rect.center = [x_pos, y_pos]
 
+		self.last_shot = pygame.time.get_ticks()
+
+		self.hp = hp
+		self.name = name
+		self.vel = vel
+		self.cooldown = cooldown #milliseconds
+
+	def extract_data(self):
+		return self.name, self.hp, self.vel, self.cooldown
+
+        #player movement
+	def update(self):
+        #key presses
+		key = pygame.key.get_pressed()
+		if key[pygame.K_LEFT] and self.rect.left > 0:
+			self.rect.x -= self.vel
+		if key[pygame.K_RIGHT] and self.rect.right < SCREEN_SIZE[0]:
+			self.rect.x += self.vel
+		if key[pygame.K_UP] and self.rect.top > 0:
+			self.rect.y -= self.vel
+		if key[pygame.K_DOWN] and self.rect.bottom < SCREEN_SIZE[1] :
+			self.rect.y += self.vel
+
+        #record current time
+		time_now = pygame.time.get_ticks()
+
+        #abilities
+            # Q - default GUN
+		if key[pygame.K_q] and time_now - self.last_shot > self.cooldown:
+			bullet = Bullet01(self.rect.centerx, self.rect.top, 8, 1)
+			bullet_group.add(bullet)
+			self.last_shot = time_now
+
+		if self.hp <= 0:
+			self.kill()
+			
+class Bullet01(pygame.sprite.Sprite):
+    def __init__(self, x_pos, y_pos, y_vel, x_vel):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load('vis/bullet_01.png')
+        self.rect = self.image.get_rect()
+        self.rect.center = [x_pos, y_pos]
+
+        self.x_vel = x_vel
+        self.y_vel = y_vel
+        self.div = randint(0, 12)
+
+    def update(self):
+        self.rect.y -= self.y_vel
+        if self.div == 0:
+            self.rect.x -= self.x_vel
+        if self.div == 1:
+            self.rect.x += self.x_vel
+
+        if self.rect.bottom < 0:
+            self.kill()
+
+########################################################################
+Players = [Player('player', 3, int(SCREEN_SIZE[0] / 2),
+		   SCREEN_SIZE[1] - 200,
+           5, 750)]
+
+########################################################################
+#Enemy stuff
+########################################################################
 #Bullet02
 class Enemy_Bullet01(pygame.sprite.Sprite):
     def __init__(self, x_pos, y_pos, y_vel, x_vel):
@@ -74,14 +151,14 @@ class Enemy_Egg01(pygame.sprite.Sprite):
 		self.div = randint(0, 2)
 
 	def explode(self):
-		bullet0 = Enemy_Shrapnel01(self.rect.centerx, self.rect.bottom,  0, 3)
-		bullet1 = Enemy_Shrapnel01(self.rect.centerx, self.rect.bottom,  2, 2)
-		bullet2 = Enemy_Shrapnel01(self.rect.centerx, self.rect.bottom,  3, 0)
-		bullet3 = Enemy_Shrapnel01(self.rect.centerx, self.rect.bottom,  -2, 2)
-		bullet4 = Enemy_Shrapnel01(self.rect.centerx, self.rect.bottom,  0, -3)
-		bullet5 = Enemy_Shrapnel01(self.rect.centerx, self.rect.bottom,  -2, -2)
-		bullet6 = Enemy_Shrapnel01(self.rect.centerx, self.rect.bottom,  -3, 0)
-		bullet7 = Enemy_Shrapnel01(self.rect.centerx, self.rect.bottom,  2, -2)
+		bullet0 = Enemy_Shrapnel01(self.rect.centerx, self.rect.centery,  0, 3)
+		bullet1 = Enemy_Shrapnel01(self.rect.centerx, self.rect.centery,  2, 2)
+		bullet2 = Enemy_Shrapnel01(self.rect.centerx, self.rect.centery,  3, 0)
+		bullet3 = Enemy_Shrapnel01(self.rect.centerx, self.rect.centery,  -2, 2)
+		bullet4 = Enemy_Shrapnel01(self.rect.centerx, self.rect.centery,  0, -3)
+		bullet5 = Enemy_Shrapnel01(self.rect.centerx, self.rect.centery,  -2, -2)
+		bullet6 = Enemy_Shrapnel01(self.rect.centerx, self.rect.centery,  -3, 0)
+		bullet7 = Enemy_Shrapnel01(self.rect.centerx, self.rect.centery,  2, -2)
 		
 		enemy_bullet_group.add(bullet0)
 		enemy_bullet_group.add(bullet1)
@@ -101,6 +178,31 @@ class Enemy_Egg01(pygame.sprite.Sprite):
 			self.kill()
 
 		if self.rect.bottom > 720:
+			self.kill()
+
+#black ops bullets
+class Enemy_Bullet02(pygame.sprite.Sprite):
+	def __init__(self, x_pos, y_pos, y_vel, x_vel):
+		pygame.sprite.Sprite.__init__(self)
+		self.image = pygame.image.load('vis/enemy_bullet_02.png')
+		self.rect = self.image.get_rect()
+		self.rect.center = [x_pos, y_pos]
+
+		self.creation_time = pygame.time.get_ticks()
+
+		self.x_vel = x_vel
+		self.y_vel = y_vel
+
+	def update(self):
+		self.rect.y += self.y_vel
+		self.rect.x += self.x_vel
+		
+		time_now = pygame.time.get_ticks()
+		
+		if time_now - self.creation_time > 5000:
+			self.kill()
+
+		if self.rect.bottom > 720 or self.rect.top < 0 or self.rect.right > 1200 or self.rect.left < 0:
 			self.kill()
 
 #Pigeons
@@ -295,3 +397,89 @@ class Pigeon03(pygame.sprite.Sprite):
 			global ENEMY_COUNTER, SCORE
 			ENEMY_COUNTER -= 1
 			SCORE += 4
+
+#black ops pigeon
+class Pigeon04(pygame.sprite.Sprite):
+	def __init__(self, x_pos, y_pos):
+		pygame.sprite.Sprite.__init__(self)
+		self.image = pygame.image.load('vis/pigeon_04.png')
+		self.rect = self.image.get_rect()
+		self.rect.center = [x_pos, y_pos]
+		
+		self.last_shot = pygame.time.get_ticks()
+		self.last_change = pygame.time.get_ticks()
+		
+		global ENEMY_COUNTER		#zliczanie przeciwnikow
+		ENEMY_COUNTER += 1
+		self.hp = 3
+		self.x_vel = randint(-5, 5)	#musi byc Int !!! inaczej sie jebie
+		self.y_vel = randint(-5, 5)
+		self.fire_sequence = 0
+		self.bullet_x_v = 0
+		self.bullet_y_v = 0
+		self.cooldown = 3000		#miliseconds
+		self.move_cooldown = 5000
+		self.fire_series_time = 100	
+
+	def update(self):
+		#movement: border bouncing
+		if self.rect.center[0] >= SCREEN_SIZE[0] - 17-5:
+			self.x_vel = randint(-5, -1)
+		elif self.rect.center[0] <= 17+5:
+			self.x_vel = randint(1, 5)
+			
+		if self.rect.center[1] >= SCREEN_SIZE[1] - 17-5:
+			self.y_vel = randint(-5, -1)
+		elif self.rect.center[1] <= 17+5:
+			self.y_vel = randint(1, 5)
+		
+		#record current time
+		time_now = pygame.time.get_ticks()
+		
+		if time_now - self.last_change > self.move_cooldown:
+			self.x_vel = randint(-5, 5)
+			self.y_vel = randint(-5, 5)
+			self.move_cooldown = 100 * randint(10, 50)
+			self.last_change = time_now
+		
+		
+		self.rect.x += self.x_vel
+		self.rect.y += self.y_vel
+		
+		
+		
+		if self.rect.y > 720 or self.rect.y < 0 or self.rect.x > 1200 or self.rect.x < 0:
+			self.kill()
+		
+		if time_now - self.last_shot > self.cooldown and self.fire_sequence == 0:
+			self.fire_sequence = 1
+			
+		if self.fire_sequence == 1:
+			self.bullet_x_v = (Players[0].rect.centerx - self.rect.centerx)//AI_SC_SIZE[0]
+			self.bullet_y_v = (Players[0].rect.centery - self.rect.centery)//AI_SC_SIZE[1]
+
+			bullet01 = Enemy_Bullet02(self.rect.centerx, self.rect.centery,
+									self.bullet_y_v, self.bullet_x_v)
+			enemy_bullet_group.add(bullet01)
+			self.last_shot = time_now
+			self.fire_sequence = 2
+		elif self.fire_sequence == 2 and time_now - self.last_shot > self.fire_series_time:
+			bullet02 = Enemy_Bullet02(self.rect.centerx, self.rect.centery,
+									self.bullet_y_v, self.bullet_x_v)
+			enemy_bullet_group.add(bullet02)
+			self.last_shot = time_now
+			self.fire_sequence = 3
+		elif self.fire_sequence == 3 and time_now - self.last_shot > self.fire_series_time:
+			bullet03 = Enemy_Bullet02(self.rect.centerx, self.rect.centery,
+									self.bullet_y_v, self.bullet_x_v)						
+			enemy_bullet_group.add(bullet03)
+			self.last_shot = time_now
+			self.fire_sequence = 0
+		
+		if pygame.sprite.spritecollide(self, bullet_group, True):
+			self.hp -= 1
+		if self.hp <= 0:
+			self.kill()
+			global ENEMY_COUNTER, SCORE
+			ENEMY_COUNTER -= 1
+			SCORE += 6
