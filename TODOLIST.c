@@ -12,11 +12,13 @@
 	3 - chonker pigeon (Pigeon03) - wysrywa jaja ktore wybuchaja i respiom
 		odlamki, porusza sie "sinusoidom" powoli, 4 hity na kil
 		[DONE]
+		dodatkowe: secondary guns gdy gracz jest blisko czy cos
 		
 	4 - black ops pigeon (Pigeon04) - szybki, respi sie randomowo, odbija
 		sie od krawedzi ekranu, strzela seriami po 4 pociski mniej wiecej
 		tam gdzie jest gracz, 3 hity na kil, po dostaniu trafienia od gracza
 		znika plynnie na sekunde, potem pojawia sie plynnie
+		[BRAKUJE ZNIKANIA PO TRAFIENIU big sad]
 
 [02][xx] - boss (Boss01) - mega chonker 100 trafien, pasek hp, 2 fazy
 		   faza 1: strzelanie w sekwencji seriami po 2, przerwa 1 sekunda
