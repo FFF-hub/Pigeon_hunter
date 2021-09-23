@@ -63,8 +63,9 @@ player = fun.Players[0]
 fun.player_group.add(player)
 
 #create enemies
-level_00_enemies = [fun.Pigeon04]
-level_00_geo = [[2, 2, 120, 80, 350, 100]]
+level_00_enemies = [fun.Pigeon02, fun.Boss01]
+level_00_geo = [[2, 2, 120, 80, 350, 100],
+				[1, 1, 0, 0, 100, 150]]
 
 level_01_enemies = [fun.Pigeon01, fun.Pigeon01]
 level_01_geo = [[5, 5, 60, 40, 200, 100],

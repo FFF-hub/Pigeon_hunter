@@ -59,8 +59,11 @@ class Player(pygame.sprite.Sprite):
 			bullet_group.add(bullet)
 			self.last_shot = time_now
 
-		if self.hp <= 0:
-			self.kill()
+		if pygame.sprite.spritecollide(self, enemy_bullet_group, True):
+			self.hp -= 1
+		
+		#if self.hp <= 0:
+		#	self.kill()
 			
 class Bullet01(pygame.sprite.Sprite):
     def __init__(self, x_pos, y_pos, y_vel, x_vel):
@@ -475,6 +478,79 @@ class Pigeon04(pygame.sprite.Sprite):
 			enemy_bullet_group.add(bullet03)
 			self.last_shot = time_now
 			self.fire_sequence = 0
+		
+		if pygame.sprite.spritecollide(self, bullet_group, True):
+			self.hp -= 1
+		if self.hp <= 0:
+			self.kill()
+			global ENEMY_COUNTER, SCORE
+			ENEMY_COUNTER -= 1
+			SCORE += 6
+
+#megachonker boss 1
+class Boss01(pygame.sprite.Sprite):
+	def __init__(self, x_pos, y_pos):
+		pygame.sprite.Sprite.__init__(self)
+		self.image = pygame.image.load('vis/boss_01.png')
+		self.rect = self.image.get_rect()
+		self.rect.center = [x_pos, y_pos]
+		
+		self.last_shot = pygame.time.get_ticks()
+		self.last_change = pygame.time.get_ticks()
+		
+		global ENEMY_COUNTER		#zliczanie przeciwnikow
+		ENEMY_COUNTER += 1
+		self.hp = 100
+		self.max_hp = self.hp
+		self.x_vel = 3	#musi byc Int !!! inaczej sie jebie
+		self.y_vel = 2
+		self.faze = 0
+		self.m_sequence_0 = 0
+		self.m_steps_0 = 800
+		self.m_counter = 0
+		self.m_sequence_1 = 0
+		self.m_steps_1 = 100
+		self.m_counter_v = 0
+		self.fire_sequence = 0
+		self.bullet_x_v = 0
+		self.bullet_y_v = 0
+		self.cooldown = 3000		#miliseconds
+		self.move_cooldown = 5000
+		self.fire_series_time = 100	
+
+	def update(self):
+		#faze 1
+		if self.m_sequence_0 == 0:
+			self.rect.x += self.x_vel
+			self.m_counter += self.x_vel
+			if self.m_counter >= self.m_steps_0:
+				self.m_sequence_0 = 1
+				self.m_counter = 0
+		elif self.m_sequence_0 == 1:
+			self.rect.x -= self.x_vel
+			self.m_counter += self.x_vel
+			if self.m_counter >= self.m_steps_0:
+				self.m_sequence_0 = 0
+				self.m_counter = 0
+		
+		if self.hp < self.max_hp // 2:
+			self.faze = 1
+		
+		#faze 2	
+		if self.faze == 1:
+			if self.m_sequence_1 == 0:
+				self.rect.y += self.y_vel
+				self.m_counter_v += self.y_vel
+				if self.m_counter_v >= self.m_steps_1:
+					self.m_sequence_1 = 1
+					self.m_counter_v = 0
+			elif self.m_sequence_1 == 1:
+				self.rect.y -= self.y_vel
+				self.m_counter_v += self.y_vel
+				if self.m_counter_v >= self.m_steps_1:
+					self.m_sequence_1 = 0
+					self.m_counter_v = 0
+	
 		
 		if pygame.sprite.spritecollide(self, bullet_group, True):
 			self.hp -= 1
