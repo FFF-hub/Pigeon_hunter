@@ -5,18 +5,18 @@ from random import randint
 #import fun
 
 # CONSTANTS
-TITLE_ = "Space Pigeons"
+
 
 # INIT VARS
 SCREEN_SIZE = fun.SCREEN_SIZE
 
 
 # init
-pygame.init()
-screen = pygame.display.set_mode(SCREEN_SIZE)
-pygame.display.set_caption(TITLE_)
-icon = pygame.image.load('vis/icon.png')
-pygame.display.set_icon(icon)
+#pygame.init()
+#screen = pygame.display.set_mode(SCREEN_SIZE)
+#pygame.display.set_caption(TITLE_)
+#icon = pygame.image.load('vis/icon.png').convert()
+#pygame.display.set_icon(icon)
 
 # game control variables
 GAME_RUNNING = True
@@ -29,7 +29,7 @@ game_clock = pygame.time.Clock()
 tick_counter_60 = 0
 
 # background
-background = pygame.image.load('vis/stars_1.png')
+background = pygame.image.load('vis/stars_1.png').convert()
 
 # classes
 # space ship
@@ -62,17 +62,53 @@ def create_level(enemies, arrangement, ):
 player = fun.Players[0]
 fun.player_group.add(player)
 
+
 #create enemies
-level_00_enemies = [fun.Pigeon02, fun.Boss01]
-level_00_geo = [[2, 2, 120, 80, 350, 100],
-				[1, 1, 0, 0, 100, 150]]
+level_00_enemies = [fun.Pigeon01]
+level_00_geo = [[4, 6, 120, 80, 300, 100]]
 
 level_01_enemies = [fun.Pigeon01, fun.Pigeon01]
 level_01_geo = [[5, 5, 60, 40, 200, 100],
-				[5, 5, 60, 40, 750, 350]]
+				[5, 5, 60, 40, 700, 100]]
+				
+level_02_enemies = [fun.Pigeon01, fun.Pigeon01,
+					fun.Pigeon02]
+level_02_geo = [[5, 5, 60, 40, 270, 100],
+				[5, 5, 60, 40, 690, 100],
+				[1, 1, 0, 0, 550, 200]]
+				
+level_03_enemies = [fun.Pigeon01, fun.Pigeon02,
+					fun.Pigeon03]
+level_03_geo = [[2, 16, 40, 40, 300, 100],
+				[1, 2, 240, 120, 475, 100],
+				[1, 2, 300, 120, 430, 50]]
+				
+level_04_enemies = [fun.Pigeon02, fun.Pigeon03]
+level_04_geo = [[1, 3, 240, 120, 335, 150],
+				[1, 7, 100, 120, 240, 50]]
+				
+level_05_enemies = [fun.Pigeon04]
+level_05_geo = [[1, 5, 50, 50, 300, 150]]
+
+level_06_enemies = [fun.Pigeon01, fun.Pigeon02,
+					fun.Pigeon03, fun.Pigeon04]
+level_06_geo = [[2, 16, 40, 40, 300, 100],
+				[1, 3, 240, 120, 335, 150],
+				[1, 2, 300, 120, 430, 50],
+				[1, 3, 50, 50, 300, 150]]
+				
+level_07_enemies = [fun.Boss01, fun.Pigeon04]
+level_07_geo = [[1, 1, 0, 0, 200, 150],
+				[2, 1, 40, 40, 300, 100]]
 
 level_map = [[level_00_enemies, level_00_geo],
-			 [level_01_enemies, level_01_geo]]
+			 [level_01_enemies, level_01_geo],
+			 [level_02_enemies, level_02_geo],
+			 [level_03_enemies, level_03_geo],
+			 [level_04_enemies, level_04_geo],
+			 [level_05_enemies, level_05_geo],
+			 [level_06_enemies, level_06_geo],
+			 [level_07_enemies, level_07_geo]]
 			 
 MAX_LEVEL = len(level_map) - 1
 
@@ -89,6 +125,11 @@ while GAME_RUNNING:
 
     # player update
 	player.update()
+	
+	# UI update
+	fun.ui.check_player(player.extract_data())
+	fun.ui_group.update()
+	fun.hp_group.update()
 
     # Bullet01s update
 	fun.bullet_group.update()
@@ -135,14 +176,17 @@ while GAME_RUNNING:
 
 # update
     #background
-	screen.blit(background, (0, 0))
+	fun.screen.blit(background, (0, 0))
 
     # player & bullets
-	fun.player_group.draw(screen)
-	fun.bullet_group.draw(screen)
+	fun.player_group.draw(fun.screen)
+	fun.bullet_group.draw(fun.screen)
     # enemies
-	fun.enemies_group.draw(screen)
-	fun.enemy_bullet_group.draw(screen)
+	fun.enemies_group.draw(fun.screen)
+	fun.enemy_bullet_group.draw(fun.screen)
+	# UI
+	fun.ui_group.draw(fun.screen)
+	fun.hp_group.draw(fun.screen)
     # draw
 	pygame.display.update()
 
