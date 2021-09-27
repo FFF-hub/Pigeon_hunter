@@ -12,13 +12,17 @@ screen = pygame.display.set_mode(SCREEN_SIZE)
 pygame.display.set_caption(TITLE_)
 icon = pygame.image.load('vis/icon.png').convert()
 pygame.display.set_icon(icon)
+font = pygame.font.SysFont("Liberation mono", 25, True)
 
 
 #variables
 AI_SC_SIZE = (SCREEN_SIZE[0]//10, SCREEN_SIZE[0]//10)
 
+DIFFICULTY_LEVEL = 3
 ENEMY_COUNTER = 0
 SCORE = 0
+TEXT_SCORE = font.render("SCORE: " + str(SCORE), False, 0xffffffff)
+TEXT_SCORE_XY = (5, 5)
 
 #sprite groups
 player_group = pygame.sprite.Group()
@@ -32,22 +36,35 @@ ui_group = pygame.sprite.Group()
 #Player stuff
 ########################################################################
 class Player(pygame.sprite.Sprite):
-	def __init__(self, name, hp, x_pos, y_pos, vel, cooldown):
+	def __init__(self, name, hp, x_pos, y_pos, vel, cooldowns: int):
 		pygame.sprite.Sprite.__init__(self)
 		self.image = pygame.image.load('vis/player_01.png').convert_alpha()
 		self.rect = self.image.get_rect()
 		self.rect.center = [x_pos, y_pos]
 
-		self.last_shot = pygame.time.get_ticks()
+		self.last_q = pygame.time.get_ticks()
+		self.last_w = pygame.time.get_ticks()
+		self.last_e = pygame.time.get_ticks()
+		self.last_r = pygame.time.get_ticks()
+		self.last_collide = pygame.time.get_ticks()
 
 		self.hp = hp
 		self.name = name
 		self.vel = vel
-		self.cooldown = cooldown #milliseconds
+		self.cooldown_q = cooldowns[0] 	#milliseconds
+		self.cooldown_w = cooldowns[1]
+		self.cooldown_e = cooldowns[2]
+		self.cooldown_r = cooldowns[3]
+		self.immunity = 500 			#mil secs
 		self.changed = 0
 
 	def extract_data(self):
-		return self.name, self.hp, self.vel, self.cooldown, self.changed
+		return self.name, self.hp, self.vel, self.cooldown_q, self.changed
+		
+	def update_stats(self, hp: int, vel: int, cooldowns: int):
+		self.hp = hp
+		self.vel = vel
+		self.cooldowns = cooldowns
 
         #player movement
 	def update(self):
@@ -68,12 +85,32 @@ class Player(pygame.sprite.Sprite):
 
         #abilities
             # Q - default GUN
-		if key[pygame.K_q] and time_now - self.last_shot > self.cooldown:
+		if key[pygame.K_q] and time_now - self.last_q > self.cooldown_q:
 			bullet = Bullet01(self.rect.centerx, self.rect.top, 8, 1)
 			bullet_group.add(bullet)
-			self.last_shot = time_now
+			self.last_q = time_now
+		if key[pygame.K_r] and time_now - self.last_r > self.cooldown_r:
+			bullet = Rocket01(self.rect.centerx, self.rect.top)
+			bullet_group.add(bullet)
+			self.last_r = time_now
 
 		if pygame.sprite.spritecollide(self, enemy_bullet_group, True):
+			global DIFFICULTY_LEVEL
+			if DIFFICULTY_LEVEL == 3:
+				self.hp -= 1
+				self.changed = 1
+			elif DIFFICULTY_LEVEL == 2 and randint(0, 1) == 0:
+				self.hp -= 1
+				self.changed = 1
+			elif DIFFICULTY_LEVEL == 1 and randint(0, 2) == 0:
+				self.hp -= 1
+				self.changed = 1
+			elif DIFFICULTY_LEVEL == 0 and randint(0, 4) == 0:
+				self.hp -= 1
+				self.changed = 1
+			
+		if pygame.sprite.spritecollide(self, enemies_group, False) and time_now - self.last_collide > self.immunity:
+			self.last_collide = time_now
 			self.hp -= 1
 			self.changed = 1
 				
@@ -100,6 +137,156 @@ class Bullet01(pygame.sprite.Sprite):
 
         if self.rect.bottom < 0:
             self.kill()
+
+class Shrapnel01(pygame.sprite.Sprite):
+	def __init__(self, x_pos, y_pos, y_vel, x_vel):
+		pygame.sprite.Sprite.__init__(self)
+		self.image = pygame.image.load('vis/shrapnel_01.png').convert_alpha()
+		self.rect = self.image.get_rect()
+		self.rect.center = [x_pos, y_pos]
+
+		self.x_vel = x_vel
+		self.y_vel = y_vel
+		self.move_counter = 0
+		self.move_steps = 100
+
+	def explode(self):
+		bullet0 = Shrapnel02(self.rect.centerx, self.rect.centery,  0, 5)
+		bullet1 = Shrapnel02(self.rect.centerx, self.rect.centery,  3, 3)
+		bullet2 = Shrapnel02(self.rect.centerx, self.rect.centery,  5, 0)
+		bullet3 = Shrapnel02(self.rect.centerx, self.rect.centery,  -3, 3)
+		bullet4 = Shrapnel02(self.rect.centerx, self.rect.centery,  0, -5)
+		bullet5 = Shrapnel02(self.rect.centerx, self.rect.centery,  -3, -3)
+		bullet6 = Shrapnel02(self.rect.centerx, self.rect.centery,  -5, 0)
+		bullet7 = Shrapnel02(self.rect.centerx, self.rect.centery,  3, -3)
+		
+		bullet_group.add(bullet0)
+		bullet_group.add(bullet1)
+		bullet_group.add(bullet2)
+		bullet_group.add(bullet3)
+		bullet_group.add(bullet4)
+		bullet_group.add(bullet5)
+		bullet_group.add(bullet6)
+		bullet_group.add(bullet7)
+
+	def update(self):
+		self.rect.y += self.y_vel
+		self.rect.x += self.x_vel
+		self.move_counter += abs(self.y_vel) + abs(self.x_vel)
+        
+		if self.move_counter >= self.move_steps:
+			self.explode()
+			self.kill()
+
+		if self.rect.bottom > 720 or self.rect.top < 0 or self.rect.right > 1200 or self.rect.left < 0:
+			self.kill()
+			
+class Shrapnel02(pygame.sprite.Sprite):
+	def __init__(self, x_pos, y_pos, y_vel, x_vel):
+		pygame.sprite.Sprite.__init__(self)
+		self.image = pygame.image.load('vis/shrapnel_02.png').convert_alpha()
+		self.rect = self.image.get_rect()
+		self.rect.center = [x_pos, y_pos]
+
+		self.x_vel = x_vel
+		self.y_vel = y_vel
+		self.move_counter = 0
+		self.move_steps = 200
+		
+	def explode(self):
+		bullet0 = Shrapnel03(self.rect.centerx, self.rect.centery,  0, 3)
+		bullet1 = Shrapnel03(self.rect.centerx, self.rect.centery,  1, 1)
+		bullet2 = Shrapnel03(self.rect.centerx, self.rect.centery,  3, 0)
+		bullet3 = Shrapnel03(self.rect.centerx, self.rect.centery,  -1, 1)
+		bullet4 = Shrapnel03(self.rect.centerx, self.rect.centery,  0, -3)
+		bullet5 = Shrapnel03(self.rect.centerx, self.rect.centery,  -1, -1)
+		bullet6 = Shrapnel03(self.rect.centerx, self.rect.centery,  -3, 0)
+		bullet7 = Shrapnel03(self.rect.centerx, self.rect.centery,  1, -1)
+		
+		bullet_group.add(bullet0)
+		bullet_group.add(bullet1)
+		bullet_group.add(bullet2)
+		bullet_group.add(bullet3)
+		bullet_group.add(bullet4)
+		bullet_group.add(bullet5)
+		bullet_group.add(bullet6)
+		bullet_group.add(bullet7)
+		
+	def update(self):
+		self.rect.y += self.y_vel
+		self.rect.x += self.x_vel
+		self.move_counter += abs(self.y_vel) + abs(self.x_vel)
+        
+		if self.move_counter >= self.move_steps:
+			self.explode()
+			self.kill()
+
+		if self.rect.bottom > 720 or self.rect.top < 0 or self.rect.right > 1200 or self.rect.left < 0:
+			self.kill()
+			
+class Shrapnel03(pygame.sprite.Sprite):
+	def __init__(self, x_pos, y_pos, y_vel, x_vel):
+		pygame.sprite.Sprite.__init__(self)
+		self.image = pygame.image.load('vis/shrapnel_03.png').convert_alpha()
+		self.rect = self.image.get_rect()
+		self.rect.center = [x_pos, y_pos]
+
+		self.x_vel = x_vel
+		self.y_vel = y_vel
+		self.move_counter = 0
+		self.move_steps = 300
+
+	def update(self):
+		self.rect.y += self.y_vel
+		self.rect.x += self.x_vel
+		self.move_counter += abs(self.y_vel) + abs(self.x_vel)
+        
+		if self.move_counter >= self.move_steps:
+			self.kill()
+
+		if self.rect.bottom > 720 or self.rect.top < 0 or self.rect.right > 1200 or self.rect.left < 0:
+			self.kill()
+
+class Rocket01(pygame.sprite.Sprite):
+	def __init__(self, x_pos, y_pos):
+		pygame.sprite.Sprite.__init__(self)
+		self.image = pygame.image.load('vis/rocket_01.png').convert_alpha()
+		self.rect = self.image.get_rect()
+		self.rect.center = [x_pos, y_pos]
+
+		self.y_vel_max = 50
+		self.y_vel = 1
+
+	def explode(self):
+		bullet0 = Shrapnel01(self.rect.centerx, self.rect.centery,  0, 6)
+		bullet1 = Shrapnel01(self.rect.centerx, self.rect.centery,  4, 4)
+		bullet2 = Shrapnel01(self.rect.centerx, self.rect.centery,  6, 0)
+		bullet3 = Shrapnel01(self.rect.centerx, self.rect.centery,  -4, 4)
+		bullet4 = Shrapnel01(self.rect.centerx, self.rect.centery,  0, -6)
+		bullet5 = Shrapnel01(self.rect.centerx, self.rect.centery,  -4, -4)
+		bullet6 = Shrapnel01(self.rect.centerx, self.rect.centery,  -6, 0)
+		bullet7 = Shrapnel01(self.rect.centerx, self.rect.centery,  4, -4)
+		
+		bullet_group.add(bullet0)
+		bullet_group.add(bullet1)
+		bullet_group.add(bullet2)
+		bullet_group.add(bullet3)
+		bullet_group.add(bullet4)
+		bullet_group.add(bullet5)
+		bullet_group.add(bullet6)
+		bullet_group.add(bullet7)
+		
+		
+	def update(self):
+		if self.y_vel < self.y_vel_max:
+			self.rect.y -= self.y_vel
+			self.y_vel += 1
+		else:
+			self.rect.y -= self.y_vel_max
+
+		if self.rect.bottom < 30 or pygame.sprite.spritecollide(self, enemies_group, True):
+			self.explode()
+			self.kill()
 
 class HealthBarElement(pygame.sprite.Sprite):
 	def __init__(self, x_pos, y_pos):
@@ -136,7 +323,7 @@ class UserInterface(pygame.sprite.Sprite):
 				if each == 5 or each == 11 or each == 17 or each == 23 or each == 29 or each == 35 or each == 41:
 					self.y_elem += 1
 					self.x_elem = 0
-					
+				
 			self.y_elem = 0
 			self.x_elem = 0
 					
@@ -155,15 +342,18 @@ class UserInterface(pygame.sprite.Sprite):
 				
 		self.y_elem = 0
 		self.x_elem = 0
-		
+				
 	def update(self):
 		self.rect.x = 0
 		self.rect.y = 0
+		global TEXT_SCORE
+		TEXT_SCORE = font.render("SCORE: " + str(SCORE), False, 0xffffffff)
+
 
 ########################################################################
 Players = [Player('player', 42, int(SCREEN_SIZE[0] / 2),
 		   SCREEN_SIZE[1] - 200,
-           5, 600)]
+           5, [600, 10 * 1000, 10 * 1000, 30 * 1000])]
 
 ui = UserInterface()
 ui_group.add(ui)
@@ -209,7 +399,7 @@ class Enemy_Shrapnel01(pygame.sprite.Sprite):
 	def update(self):
 		self.rect.y += self.y_vel
 		self.rect.x += self.x_vel
-		self.move_counter += self.y_vel + self.x_vel
+		self.move_counter += abs(self.y_vel) + abs(self.x_vel)
         
 		if self.move_counter >= self.move_steps:
 			self.kill()
