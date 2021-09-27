@@ -40,12 +40,15 @@
 		   W: laser penetrujacy, burst 0.5s, cd 10s
 		   E: tarcza 3hits, 10s cooldown
 		   R: nuke 100 score, 30s cooldown, dmg 10 w promieniu (respi kolo)
+				[DONE]
 		   
 [03][xx] - powerups hp boost
 
-[04][xx] - score + score screen after level completion
+[04][xx] - score + score screen after level completion(count to all killed enemies,
+			count to current score, add remaining hp to score + mod for diff level,
+			background: some pigeon, some text, idk???)
 
-[05][xx] - menu
+[05][xx] - menu klasa przycisku (if pressed to zwraca true, i sie cos dzieje kurwa)
 
 [06][xx] - animations
 
@@ -58,6 +61,7 @@
 [10][??] - item shop after the boss level
 
 [11][??] - difficulty levels: 4
+			[DONE]
 
 [00][xx] - 
 

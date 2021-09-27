@@ -46,7 +46,7 @@ def create_enemies(enemy_type, rows, cols, x_dis, y_dis, x_buf, y_buf):
 #level creator function
 # enemies = [pigeon01, pigeon02, ..., pigeonN]
 # arrangement = [[rows, cols, x_dis, y_dis, x_buf, y_buf], ..., '']
-def create_level(enemies, arrangement, ):
+def create_level(enemies, arrangement):
 	vector_dim = len(enemies)
 	for current_position in range(vector_dim):
 		create_enemies(enemies[current_position],
@@ -57,6 +57,8 @@ def create_level(enemies, arrangement, ):
 					   arrangement[current_position][4],
 					   arrangement[current_position][5])
 		
+def level_complete_screen(enemies_killed, score, hp):
+	fucking_somethink = 1
 
 # Levels and player init
 player = fun.Players[0]
@@ -112,7 +114,7 @@ level_map = [[level_00_enemies, level_00_geo],
 			 
 MAX_LEVEL = len(level_map) - 1
 
-create_level(level_00_enemies, level_00_geo)
+create_level(level_03_enemies, level_03_geo)
 # End of Level zero
 
 # game loop
@@ -169,7 +171,7 @@ while GAME_RUNNING:
 		tick_counter_60 += 1
 	else:
 		print(game_clock.get_fps())
-		print("pozostalo: ", fun.ENEMY_COUNTER)
+		print("pozostalo: ", fun.ENEMY_COUNTER, " SCORE: ", fun.SCORE)
 		tick_counter_60 = 0
         
     # -----------------
@@ -187,6 +189,7 @@ while GAME_RUNNING:
 	# UI
 	fun.ui_group.draw(fun.screen)
 	fun.hp_group.draw(fun.screen)
+	fun.screen.blit(fun.TEXT_SCORE, fun.TEXT_SCORE_XY)
     # draw
 	pygame.display.update()
 
