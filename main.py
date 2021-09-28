@@ -66,11 +66,11 @@ fun.player_group.add(player)
 
 
 #create enemies
-level_00_enemies = [fun.Pigeon01]
-level_00_geo = [[4, 6, 120, 80, 300, 100]]
+level_01_enemies = [fun.Pigeon01]
+level_01_geo = [[4, 6, 120, 80, 300, 100]]
 
-level_01_enemies = [fun.Pigeon01, fun.Pigeon01]
-level_01_geo = [[5, 5, 60, 40, 200, 100],
+level_00_enemies = [fun.Pigeon01, fun.Pigeon01]
+level_00_geo = [[5, 5, 60, 40, 200, 100],
 				[5, 5, 60, 40, 700, 100]]
 				
 level_02_enemies = [fun.Pigeon01, fun.Pigeon01,
@@ -114,7 +114,7 @@ level_map = [[level_00_enemies, level_00_geo],
 			 
 MAX_LEVEL = len(level_map) - 1
 
-create_level(level_03_enemies, level_03_geo)
+create_level(level_00_enemies, level_00_geo)
 # End of Level zero
 
 # game loop
@@ -135,6 +135,7 @@ while GAME_RUNNING:
 
     # Bullet01s update
 	fun.bullet_group.update()
+	fun.rocket_group.update()
 
     # Enemies update
 	fun.enemies_group.update()
@@ -147,6 +148,9 @@ while GAME_RUNNING:
 		NEXT_LEVEL = True
 		print("CONGRATULATIONS: you have completed first encounter!")
 		print("fun.SCORE: ", fun.SCORE)
+		fun.bullet_group.empty()
+		fun.rocket_group.empty()
+		fun.enemy_bullet_group.empty()
 		# level creation function here
 		# position of player with data from previous lvl
 		# new locations of enemies
@@ -183,6 +187,7 @@ while GAME_RUNNING:
     # player & bullets
 	fun.player_group.draw(fun.screen)
 	fun.bullet_group.draw(fun.screen)
+	fun.rocket_group.draw(fun.screen)
     # enemies
 	fun.enemies_group.draw(fun.screen)
 	fun.enemy_bullet_group.draw(fun.screen)

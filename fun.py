@@ -27,6 +27,7 @@ TEXT_SCORE_XY = (5, 5)
 #sprite groups
 player_group = pygame.sprite.Group()
 bullet_group = pygame.sprite.Group()
+rocket_group = pygame.sprite.Group()
 enemy_bullet_group = pygame.sprite.Group()
 enemies_group = pygame.sprite.Group()
 hp_group = pygame.sprite.Group()
@@ -90,8 +91,8 @@ class Player(pygame.sprite.Sprite):
 			bullet_group.add(bullet)
 			self.last_q = time_now
 		if key[pygame.K_r] and time_now - self.last_r > self.cooldown_r:
-			bullet = Rocket01(self.rect.centerx, self.rect.top)
-			bullet_group.add(bullet)
+			rocket = Rocket01(self.rect.centerx, self.rect.top)
+			rocket_group.add(rocket)
 			self.last_r = time_now
 
 		if pygame.sprite.spritecollide(self, enemy_bullet_group, True):
@@ -284,7 +285,7 @@ class Rocket01(pygame.sprite.Sprite):
 		else:
 			self.rect.y -= self.y_vel_max
 
-		if self.rect.bottom < 30 or pygame.sprite.spritecollide(self, enemies_group, True):
+		if self.rect.bottom < 30 or pygame.sprite.spritecollide(self, enemies_group, False):
 			self.explode()
 			self.kill()
 
@@ -353,7 +354,7 @@ class UserInterface(pygame.sprite.Sprite):
 ########################################################################
 Players = [Player('player', 42, int(SCREEN_SIZE[0] / 2),
 		   SCREEN_SIZE[1] - 200,
-           5, [600, 10 * 1000, 10 * 1000, 30 * 1000])]
+           5, [600, 10 * 1000, 10 * 1000, 1 * 1000])]
 
 ui = UserInterface()
 ui_group.add(ui)
@@ -497,11 +498,12 @@ class Pigeon01(pygame.sprite.Sprite):
     def update(self):
         self.rect.x += self.x_vel * self.move_direction
         self.move_counter += self.x_vel
+        global SCREEN_SIZE
         if abs(self.move_counter) > self.move_steps:
             self.move_direction *= -1
             self.move_counter *= self.move_direction
             self.rect.y += self.y_step
-        if pygame.sprite.spritecollide(self, bullet_group, True):
+        if pygame.sprite.spritecollide(self, bullet_group, True) or self.rect.y > SCREEN_SIZE[1]:
             self.hp -= 1
         if self.hp <= 0:
             self.kill()
