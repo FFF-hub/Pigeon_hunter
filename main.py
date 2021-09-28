@@ -136,6 +136,7 @@ while GAME_RUNNING:
     # Bullet01s update
 	fun.bullet_group.update()
 	fun.rocket_group.update()
+	fun.laser_group.update()
 
     # Enemies update
 	fun.enemies_group.update()
@@ -150,6 +151,8 @@ while GAME_RUNNING:
 		print("fun.SCORE: ", fun.SCORE)
 		fun.bullet_group.empty()
 		fun.rocket_group.empty()
+		fun.enemies_group.empty()
+		fun.laser_group.empty()
 		fun.enemy_bullet_group.empty()
 		# level creation function here
 		# position of player with data from previous lvl
@@ -188,6 +191,7 @@ while GAME_RUNNING:
 	fun.player_group.draw(fun.screen)
 	fun.bullet_group.draw(fun.screen)
 	fun.rocket_group.draw(fun.screen)
+	fun.laser_group.draw(fun.screen)
     # enemies
 	fun.enemies_group.draw(fun.screen)
 	fun.enemy_bullet_group.draw(fun.screen)

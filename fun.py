@@ -28,6 +28,7 @@ TEXT_SCORE_XY = (5, 5)
 player_group = pygame.sprite.Group()
 bullet_group = pygame.sprite.Group()
 rocket_group = pygame.sprite.Group()
+laser_group = pygame.sprite.Group()
 enemy_bullet_group = pygame.sprite.Group()
 enemies_group = pygame.sprite.Group()
 hp_group = pygame.sprite.Group()
@@ -90,6 +91,10 @@ class Player(pygame.sprite.Sprite):
 			bullet = Bullet01(self.rect.centerx, self.rect.top, 8, 1)
 			bullet_group.add(bullet)
 			self.last_q = time_now
+		if key[pygame.K_w] and time_now - self.last_w > self.cooldown_w:
+			laser = Laser01(self.rect.centerx, self.rect.top - 150)
+			laser_group.add(laser)
+			self.last_w = time_now
 		if key[pygame.K_r] and time_now - self.last_r > self.cooldown_r:
 			rocket = Rocket01(self.rect.centerx, self.rect.top)
 			rocket_group.add(rocket)
@@ -138,6 +143,24 @@ class Bullet01(pygame.sprite.Sprite):
 
         if self.rect.bottom < 0:
             self.kill()
+            
+class Laser01(pygame.sprite.Sprite):
+	def __init__(self, x_pos, y_pos):
+		pygame.sprite.Sprite.__init__(self)
+		self.image = pygame.image.load('vis/laser_01.png').convert()
+		self.rect = self.image.get_rect()
+		self.rect.center = [x_pos, y_pos]
+	
+		self.spawn_time = pygame.time.get_ticks()
+		self.decay_time = 87			#time for 5 laser dmg ticks
+		self.y_vel = -1
+	
+	def update(self):
+		time_now = pygame.time.get_ticks()
+		self.rect.y += self.y_vel
+        
+		if time_now - self.spawn_time > self.decay_time:
+			self.kill()
 
 class Shrapnel01(pygame.sprite.Sprite):
 	def __init__(self, x_pos, y_pos, y_vel, x_vel):
@@ -354,7 +377,7 @@ class UserInterface(pygame.sprite.Sprite):
 ########################################################################
 Players = [Player('player', 42, int(SCREEN_SIZE[0] / 2),
 		   SCREEN_SIZE[1] - 200,
-           5, [600, 10 * 1000, 10 * 1000, 1 * 1000])]
+           5, [600, 1 * 1000, 10 * 1000, 1 * 1000])]
 
 ui = UserInterface()
 ui_group.add(ui)
@@ -505,6 +528,8 @@ class Pigeon01(pygame.sprite.Sprite):
             self.rect.y += self.y_step
         if pygame.sprite.spritecollide(self, bullet_group, True) or self.rect.y > SCREEN_SIZE[1]:
             self.hp -= 1
+        if pygame.sprite.spritecollide(self, laser_group, False):
+            self.hp -= 2    
         if self.hp <= 0:
             self.kill()
             global ENEMY_COUNTER, SCORE
@@ -595,7 +620,10 @@ class Pigeon02(pygame.sprite.Sprite):
 		
 		if pygame.sprite.spritecollide(self, bullet_group, True):
 			self.hp -= 1
-			
+		
+		if pygame.sprite.spritecollide(self, laser_group, False):
+			self.hp -= 2   
+		
 		if self.hp <= 0:
 			self.kill()
 			global ENEMY_COUNTER, SCORE
@@ -665,6 +693,10 @@ class Pigeon03(pygame.sprite.Sprite):
 		
 		if pygame.sprite.spritecollide(self, bullet_group, True):
 			self.hp -= 1
+		
+		if pygame.sprite.spritecollide(self, laser_group, False):
+			self.hp -= 2   
+		
 		if self.hp <= 0:
 			self.kill()
 			global ENEMY_COUNTER, SCORE
@@ -751,6 +783,10 @@ class Pigeon04(pygame.sprite.Sprite):
 		
 		if pygame.sprite.spritecollide(self, bullet_group, True):
 			self.hp -= 1
+			
+		if pygame.sprite.spritecollide(self, laser_group, False):
+			self.hp -= 2   
+			
 		if self.hp <= 0:
 			self.kill()
 			global ENEMY_COUNTER, SCORE
@@ -892,6 +928,10 @@ class Boss01(pygame.sprite.Sprite):
 		
 		if pygame.sprite.spritecollide(self, bullet_group, True):
 			self.hp -= 1
+			
+		if pygame.sprite.spritecollide(self, laser_group, False):
+			self.hp -= 1   
+			
 		if self.hp <= 0:
 			self.kill()
 			global ENEMY_COUNTER, SCORE
