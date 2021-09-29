@@ -33,14 +33,14 @@
 				skils:	[xx]
 				buffs:	[xx]
 
-[03][xx] - 3 remaining player abilities
+[03][OK] - 3 remaining player abilities
 		   uzywanie skilli kosztuje SCORE, za score mozna kupowac itemy
 		   skile maja cooldown
 		   Q: [DONE]
 		   W: laser penetrujacy, burst 0.5s, cd 10s
 		   E: tarcza 3hits, 10s cooldown
 		   R: nuke 100 score, 30s cooldown, dmg 10 w promieniu (respi kolo)
-				[DONE]
+		[DONE]
 		   
 [03][xx] - powerups hp boost
 
