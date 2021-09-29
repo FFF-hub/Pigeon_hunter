@@ -126,10 +126,11 @@ while GAME_RUNNING:
 			GAME_RUNNING = False
 
     # player update
-	player.update()
+	player_data = player.extract_data()
+	fun.player_group.update()
 	
 	# UI update
-	fun.ui.check_player(player.extract_data())
+	fun.ui.check_player(player_data)
 	fun.ui_group.update()
 	fun.hp_group.update()
 

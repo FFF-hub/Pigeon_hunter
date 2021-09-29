@@ -61,7 +61,7 @@ class Player(pygame.sprite.Sprite):
 		self.changed = 0
 
 	def extract_data(self):
-		return self.name, self.hp, self.vel, self.cooldown_q, self.changed
+		return self.name, self.hp, self.vel, self.cooldown_q, self.rect.x, self.rect.y, self.changed
 		
 	def update_stats(self, hp: int, vel: int, cooldowns: int):
 		self.hp = hp
@@ -95,6 +95,10 @@ class Player(pygame.sprite.Sprite):
 			laser = Laser01(self.rect.centerx, self.rect.top - 150)
 			laser_group.add(laser)
 			self.last_w = time_now
+		if key[pygame.K_e] and time_now - self.last_e > self.cooldown_e:
+			shield = Shield01(self.rect.centerx, self.rect.centery)
+			player_group.add(shield)
+			self.last_e = time_now
 		if key[pygame.K_r] and time_now - self.last_r > self.cooldown_r:
 			rocket = Rocket01(self.rect.centerx, self.rect.top)
 			rocket_group.add(rocket)
@@ -120,6 +124,33 @@ class Player(pygame.sprite.Sprite):
 			self.hp -= 1
 			self.changed = 1
 				
+		if self.hp <= 0:
+			self.kill()
+			
+class Shield01(pygame.sprite.Sprite):
+	def __init__(self, x_pos, y_pos):
+		pygame.sprite.Sprite.__init__(self)
+		self.image = pygame.image.load('vis/shield_01.png').convert_alpha()
+		self.rect = self.image.get_rect()
+		self.rect.center = [x_pos, y_pos]
+		
+		self.hp = 3
+		self.vel = 5
+
+	def update(self):
+		key = pygame.key.get_pressed()
+		if key[pygame.K_LEFT] and self.rect.left > 0:
+			self.rect.x -= self.vel
+		if key[pygame.K_RIGHT] and self.rect.right < SCREEN_SIZE[0]:
+			self.rect.x += self.vel
+		if key[pygame.K_UP] and self.rect.top > 0:
+			self.rect.y -= self.vel
+		if key[pygame.K_DOWN] and self.rect.bottom < SCREEN_SIZE[1] :
+			self.rect.y += self.vel
+	
+		if pygame.sprite.spritecollide(self, enemy_bullet_group, True):
+			self.hp -= 1
+	
 		if self.hp <= 0:
 			self.kill()
 			
@@ -377,7 +408,7 @@ class UserInterface(pygame.sprite.Sprite):
 ########################################################################
 Players = [Player('player', 42, int(SCREEN_SIZE[0] / 2),
 		   SCREEN_SIZE[1] - 200,
-           5, [600, 1 * 1000, 10 * 1000, 1 * 1000])]
+           5, [600, 1 * 1000, 1 * 1000, 1 * 1000])]
 
 ui = UserInterface()
 ui_group.add(ui)
