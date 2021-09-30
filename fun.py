@@ -334,11 +334,15 @@ class Rocket01(pygame.sprite.Sprite):
 		
 	def update(self):
 		if self.y_vel < self.y_vel_max:
-			self.rect.y -= self.y_vel
 			self.y_vel += 1
 		else:
-			self.rect.y -= self.y_vel_max
-
+			self.y_vel = self.y_vel_max
+			
+		if self.rect.y - self.y_vel	> 5:
+			self.rect.y -= self.y_vel
+		else:
+			self.rect.y = 5
+		
 		if self.rect.bottom < 30 or pygame.sprite.spritecollide(self, enemies_group, False):
 			self.explode()
 			self.kill()
