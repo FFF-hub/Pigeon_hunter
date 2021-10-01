@@ -8,21 +8,38 @@ SCREEN_SIZE = (1200, 720)
 
 # init
 pygame.init()
+pygame.mixer.init()
 screen = pygame.display.set_mode(SCREEN_SIZE)
 pygame.display.set_caption(TITLE_)
 icon = pygame.image.load('vis/icon.png').convert()
 pygame.display.set_icon(icon)
 font = pygame.font.SysFont("Liberation mono", 25, True)
+font2 = pygame.font.SysFont("Liberation mono", 17, True)
 
+#sound channels
+channel_0 = pygame.mixer.Channel(0)
+channel_1 = pygame.mixer.Channel(1)
+channel_2 = pygame.mixer.Channel(2)
+channel_3 = pygame.mixer.Channel(3)
+channel_4 = pygame.mixer.Channel(4)
+channel_5 = pygame.mixer.Channel(5)
+channel_6 = pygame.mixer.Channel(6)
+channel_7 = pygame.mixer.Channel(7)
 
 #variables
 AI_SC_SIZE = (SCREEN_SIZE[0]//10, SCREEN_SIZE[0]//10)
+
+COOLDOWNS = [600, 1 * 1000, 1 * 1000, 1 * 1000]
 
 DIFFICULTY_LEVEL = 3
 ENEMY_COUNTER = 0
 SCORE = 0
 TEXT_SCORE = font.render("SCORE: " + str(SCORE), False, 0xffffffff)
+TEXT_COOLDOWNS = font.render("Q W E R", False, 0xffffffff)
+TEXT_COOLDOWNS_VAL = font2.render(str(COOLDOWNS[0]//1000) + "  " + str(COOLDOWNS[1]//1000) + "  " + str(COOLDOWNS[2]//1000) + "  " + str(COOLDOWNS[3]//1000), False, 0xffffffff)
 TEXT_SCORE_XY = (5, 5)
+TEXT_COOLDOWNS_XY = (1080, 680)
+TEXT_COOLDOWNS_VAL_XY = (1080, 650)
 
 #sprite groups
 player_group = pygame.sprite.Group()
@@ -49,7 +66,24 @@ class Player(pygame.sprite.Sprite):
 		self.last_e = pygame.time.get_ticks()
 		self.last_r = pygame.time.get_ticks()
 		self.last_collide = pygame.time.get_ticks()
-
+	
+		self.channel_0 = pygame.mixer.Channel(0)
+		self.channel_1 = pygame.mixer.Channel(1)
+		self.channel_2 = pygame.mixer.Channel(2)
+		self.channel_3 = pygame.mixer.Channel(3)
+		self.channel_4 = pygame.mixer.Channel(4)
+		
+		self.sound_hp_down = pygame.mixer.Sound("sfx/hp_down.wav")
+		self.sound_hp_down.set_volume(0.3)
+		self.sound_q = pygame.mixer.Sound("sfx/q.wav")
+		self.sound_q.set_volume(0.2)
+		self.sound_w = pygame.mixer.Sound("sfx/w.wav")
+		self.sound_w.set_volume(0.2)
+		self.sound_e = pygame.mixer.Sound("sfx/e.wav")
+		self.sound_e.set_volume(0.2)
+		self.sound_r = pygame.mixer.Sound("sfx/r.wav")
+		self.sound_r.set_volume(0.2)
+			
 		self.hp = hp
 		self.name = name
 		self.vel = vel
@@ -59,15 +93,22 @@ class Player(pygame.sprite.Sprite):
 		self.cooldown_r = cooldowns[3]
 		self.immunity = 500 			#mil secs
 		self.changed = 0
+		self.cd_q_remaining = cooldowns[0]
+		self.cd_w_remaining = cooldowns[1]
+		self.cd_e_remaining = cooldowns[2]
+		self.cd_r_remaining = cooldowns[3]
 
 	def extract_data(self):
-		return self.name, self.hp, self.vel, self.cooldown_q, self.rect.x, self.rect.y, self.changed
+		return self.name, self.hp, self.vel, [self.cd_q_remaining, self.cd_w_remaining, self.cd_e_remaining, self.cd_r_remaining], self.rect.x, self.rect.y, self.changed
 		
 	def update_stats(self, hp: int, vel: int, cooldowns: int):
 		self.hp = hp
 		self.vel = vel
 		self.cooldowns = cooldowns
-
+	
+	def sound_master(self):
+		self.hp = 1
+	
         #player movement
 	def update(self):
 		self.changed = 0
@@ -81,7 +122,7 @@ class Player(pygame.sprite.Sprite):
 			self.rect.y -= self.vel
 		if key[pygame.K_DOWN] and self.rect.bottom < SCREEN_SIZE[1] :
 			self.rect.y += self.vel
-
+		
         #record current time
 		time_now = pygame.time.get_ticks()
 
@@ -90,38 +131,69 @@ class Player(pygame.sprite.Sprite):
 		if key[pygame.K_q] and time_now - self.last_q > self.cooldown_q:
 			bullet = Bullet01(self.rect.centerx, self.rect.top, 8, 1)
 			bullet_group.add(bullet)
+			self.channel_1.play(self.sound_q)
 			self.last_q = time_now
 		if key[pygame.K_w] and time_now - self.last_w > self.cooldown_w:
 			laser = Laser01(self.rect.centerx, self.rect.top - 150)
 			laser_group.add(laser)
+			self.channel_2.play(self.sound_w)
 			self.last_w = time_now
 		if key[pygame.K_e] and time_now - self.last_e > self.cooldown_e:
 			shield = Shield01(self.rect.centerx, self.rect.centery)
 			player_group.add(shield)
+			self.channel_3.play(self.sound_e)
 			self.last_e = time_now
 		if key[pygame.K_r] and time_now - self.last_r > self.cooldown_r:
 			rocket = Rocket01(self.rect.centerx, self.rect.top)
 			rocket_group.add(rocket)
+			self.channel_4.play(self.sound_r)
 			self.last_r = time_now
-
+		
+		#updateing cooldowns
+		if self.cooldown_q - (time_now - self.last_q) < 0:
+			self.cd_q_remaining = 0
+		else:
+			self.cd_q_remaining = self.cooldown_q - (time_now - self.last_q)
+		
+		if self.cooldown_w - (time_now - self.last_w) < 0:
+			self.cd_w_remaining = 0
+		else:
+			self.cd_w_remaining = self.cooldown_w - (time_now - self.last_w)
+		
+		if self.cooldown_e - (time_now - self.last_e) < 0:
+			self.cd_e_remaining = 0
+		else:
+			self.cd_e_remaining = self.cooldown_e - (time_now - self.last_e)
+		
+		if self.cooldown_r - (time_now - self.last_r) < 0:
+			self.cd_r_remaining = 0
+		else:
+			self.cd_r_remaining = self.cooldown_r - (time_now - self.last_r)
+				
+		
 		if pygame.sprite.spritecollide(self, enemy_bullet_group, True):
 			global DIFFICULTY_LEVEL
 			if DIFFICULTY_LEVEL == 3:
 				self.hp -= 1
+				self.channel_0.play(self.sound_hp_down)
 				self.changed = 1
 			elif DIFFICULTY_LEVEL == 2 and randint(0, 1) == 0:
 				self.hp -= 1
+				self.channel_0.play(self.sound_hp_down)
 				self.changed = 1
 			elif DIFFICULTY_LEVEL == 1 and randint(0, 2) == 0:
 				self.hp -= 1
+				self.channel_0.play(self.sound_hp_down)
 				self.changed = 1
 			elif DIFFICULTY_LEVEL == 0 and randint(0, 4) == 0:
 				self.hp -= 1
+				self.channel_0.play(self.sound_hp_down)
 				self.changed = 1
 			
 		if pygame.sprite.spritecollide(self, enemies_group, False) and time_now - self.last_collide > self.immunity:
 			self.last_collide = time_now
 			self.hp -= 1
+			self.channel_0.play(self.sound_hp_down)
 			self.changed = 1
 				
 		if self.hp <= 0:
@@ -183,7 +255,7 @@ class Laser01(pygame.sprite.Sprite):
 		self.rect.center = [x_pos, y_pos]
 	
 		self.spawn_time = pygame.time.get_ticks()
-		self.decay_time = 87			#time for 5 laser dmg ticks
+		self.decay_time = 87 * 3			#time for 5 laser dmg ticks
 		self.y_vel = -1
 	
 	def update(self):
@@ -199,13 +271,19 @@ class Shrapnel01(pygame.sprite.Sprite):
 		self.image = pygame.image.load('vis/shrapnel_01.png').convert_alpha()
 		self.rect = self.image.get_rect()
 		self.rect.center = [x_pos, y_pos]
-
+		
+		self.channel_0 = pygame.mixer.Channel(6)
+		
+		self.sound_exp = pygame.mixer.Sound("sfx/r_exp_2.wav")
+		self.sound_exp.set_volume(0.3)
+		
 		self.x_vel = x_vel
 		self.y_vel = y_vel
 		self.move_counter = 0
 		self.move_steps = 100
 
 	def explode(self):
+		self.channel_0.play(self.sound_exp)
 		bullet0 = Shrapnel02(self.rect.centerx, self.rect.centery,  0, 5)
 		bullet1 = Shrapnel02(self.rect.centerx, self.rect.centery,  3, 3)
 		bullet2 = Shrapnel02(self.rect.centerx, self.rect.centery,  5, 0)
@@ -308,11 +386,17 @@ class Rocket01(pygame.sprite.Sprite):
 		self.image = pygame.image.load('vis/rocket_01.png').convert_alpha()
 		self.rect = self.image.get_rect()
 		self.rect.center = [x_pos, y_pos]
-
+		
+		self.channel_0 = pygame.mixer.Channel(5)
+		
+		self.sound_exp = pygame.mixer.Sound("sfx/r_exp.wav")
+		self.sound_exp.set_volume(0.4)
+	
 		self.y_vel_max = 50
 		self.y_vel = 1
 
 	def explode(self):
+		self.channel_0.play(self.sound_exp)
 		bullet0 = Shrapnel01(self.rect.centerx, self.rect.centery,  0, 6)
 		bullet1 = Shrapnel01(self.rect.centerx, self.rect.centery,  4, 4)
 		bullet2 = Shrapnel01(self.rect.centerx, self.rect.centery,  6, 0)
@@ -347,13 +431,13 @@ class Rocket01(pygame.sprite.Sprite):
 			self.explode()
 			self.kill()
 
-class HealthBarElement(pygame.sprite.Sprite):
+class GreenBoxUiElement(pygame.sprite.Sprite):
 	def __init__(self, x_pos, y_pos):
 		pygame.sprite.Sprite.__init__(self)
 		self.image = pygame.image.load('vis/hp.png').convert()
 		self.rect = self.image.get_rect()
 		self.rect.center = [x_pos, y_pos]
-
+		
 		self.x_pos = x_pos
 		self.y_pos = y_pos
 
@@ -368,15 +452,21 @@ class UserInterface(pygame.sprite.Sprite):
 		self.rect = self.image.get_rect()
 		self.rect.center = [0, 0]
 		
+		self.last_cd_refresh = pygame.time.get_ticks()
+		self.refresh_cd = 1000
+		
 		self.somethink = 0
 		self.x_elem = 0
 		self.y_elem = 0
 		
+		self.player_data = 0
+		
+	#to jest gówno do wyświetlania HP tymi kafelkami zielonymi, to robi tak, to tak nie powiino być
 	def check_player(self, data):
 		if data[len(data) - 1] == 1 and data[1] != 0:
 			hp_group.empty()
 			for each in range(0, data[1]):
-				hp_tile = HealthBarElement(60 + self.x_elem * 10, 700 - self.y_elem * 10)
+				hp_tile = GreenBoxUiElement(60 + self.x_elem * 10, 700 - self.y_elem * 10)
 				hp_group.add(hp_tile)
 				self.x_elem += 1
 				if each == 5 or each == 11 or each == 17 or each == 23 or each == 29 or each == 35 or each == 41:
@@ -389,10 +479,12 @@ class UserInterface(pygame.sprite.Sprite):
 			self.somethink = 1
 		else:
 			self.somethink = 0
-			
+		
+		self.player_data = data
+		
 	def init(self, data):
 		for each in range(0, data[1]):
-			hp_tile = HealthBarElement(60 + self.x_elem * 10, 700 - self.y_elem * 10)
+			hp_tile = GreenBoxUiElement(60 + self.x_elem * 10, 700 - self.y_elem * 10)
 			hp_group.add(hp_tile)
 			self.x_elem += 1
 			if each == 5 or each == 11 or each == 17 or each == 23 or each == 29 or each == 35 or each == 41:
@@ -405,14 +497,20 @@ class UserInterface(pygame.sprite.Sprite):
 	def update(self):
 		self.rect.x = 0
 		self.rect.y = 0
+		time_now = self.spawn_time = pygame.time.get_ticks()
 		global TEXT_SCORE
+		global TEXT_COOLDOWNS
+		global TEXT_COOLDOWNS_VAL
 		TEXT_SCORE = font.render("SCORE: " + str(SCORE), False, 0xffffffff)
+		TEXT_COOLDOWNS = font.render("Q W E R", False, 0xffffffff)
+		if time_now - self.last_cd_refresh > self.refresh_cd:
+			TEXT_COOLDOWNS_VAL = font2.render(str(self.player_data[3][0]//1000) + "  " + str(self.player_data[3][1]//1000) + "  " + str(self.player_data[3][2]//1000) + "  " + str(self.player_data[3][3]//1000), False, 0xffffffff)
 
 
 ########################################################################
 Players = [Player('player', 42, int(SCREEN_SIZE[0] / 2),
 		   SCREEN_SIZE[1] - 200,
-           5, [600, 1 * 1000, 1 * 1000, 1 * 1000])]
+           5, COOLDOWNS)]
 
 ui = UserInterface()
 ui_group.add(ui)

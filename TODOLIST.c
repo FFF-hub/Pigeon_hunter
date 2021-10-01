@@ -27,12 +27,13 @@
 		[DONE]
 
 
-[2.5][xx] - User Interface:
+[2.5][OK] - User Interface:
 				hp bar: [DONE]
-				score: 	[xx]
-				skils:	[xx]
-				buffs:	[xx]
-
+				score: 	[DONE]
+				skils:	[DONE]
+				buffs:	[Abandoned]
+			[DONE]
+			
 [03][OK] - 3 remaining player abilities
 		   uzywanie skilli kosztuje SCORE, za score mozna kupowac itemy
 		   skile maja cooldown
@@ -42,55 +43,21 @@
 		   R: nuke 100 score, 30s cooldown, dmg 10 w promieniu (respi kolo)
 		[DONE]
 		   
-[03][xx] - powerups hp boost
+[03][Abandoned] - powerups hp boost
 
-[04][xx] - score + score screen after level completion(count to all killed enemies,
-			count to current score, add remaining hp to score + mod for diff level,
-			background: some pigeon, some text, idk???)
+[04][maybe??] - score + score screen after level completion
 
-[05][xx] - menu klasa przycisku (if pressed to zwraca true, i sie cos dzieje kurwa)
+[05][Abandoned] - menu klasa przycisku (if pressed to zwraca true, i sie cos dzieje kurwa)
 
-[06][xx] - animations
+[06][Abandoned] - animations
 
-[07][xx] - sounds
+[07][xx] - sounds /
 
 [08][xx] - music
 
-[09][??] - items!
+[09][Abandoned] - items!
 
-[10][??] - item shop after the boss level
+[10][Abandoned] - item shop after the boss level
 
-[11][??] - difficulty levels: 4
+[11][OK] - difficulty levels: 4
 			[DONE]
-
-[00][xx] - 
-
-[00][xx] - 
-
-[00][xx] - 
-
-[00][xx] - 
-
-[00][xx] - 
-
-[00][xx] - 
-
-[00][xx] - 
-
-[00][xx] - 
-
-[00][xx] - 
-
-[00][xx] - 
-
-[00][xx] - 
-
-[00][xx] - 
-
-[00][xx] - 
-
-[00][xx] - 
-
-[00][xx] - 
-
-[00][xx] - 
