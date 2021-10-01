@@ -66,11 +66,11 @@ fun.player_group.add(player)
 
 
 #create enemies
-level_01_enemies = [fun.Pigeon01]
-level_01_geo = [[4, 6, 120, 80, 300, 100]]
+level_00_enemies = [fun.Pigeon01]
+level_00_geo = [[4, 6, 120, 80, 300, 100]]
 
-level_00_enemies = [fun.Pigeon01, fun.Pigeon01]
-level_00_geo = [[5, 5, 60, 40, 200, 100],
+level_01_enemies = [fun.Pigeon01, fun.Pigeon01]
+level_01_geo = [[5, 5, 60, 40, 200, 100],
 				[5, 5, 60, 40, 700, 100]]
 				
 level_02_enemies = [fun.Pigeon01, fun.Pigeon01,
@@ -200,9 +200,12 @@ while GAME_RUNNING:
 	fun.ui_group.draw(fun.screen)
 	fun.hp_group.draw(fun.screen)
 	fun.screen.blit(fun.TEXT_SCORE, fun.TEXT_SCORE_XY)
+	fun.screen.blit(fun.TEXT_COOLDOWNS, fun.TEXT_COOLDOWNS_XY)
+	fun.screen.blit(fun.TEXT_COOLDOWNS_VAL, fun.TEXT_COOLDOWNS_VAL_XY)
     # draw
 	pygame.display.update()
 
 
 # exit
 pygame.quit()
+pygame.mixer.quit()
