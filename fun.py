@@ -32,7 +32,7 @@ channel_7 = pygame.mixer.Channel(7)
 #variables
 AI_SC_SIZE = (SCREEN_SIZE[0]//10, SCREEN_SIZE[0]//10)
 
-COOLDOWNS = [600, 1 * 1000, 1 * 1000, 1 * 1000]
+COOLDOWNS = [300, 1 * 1000, 1 * 1000, 1 * 1000]
 
 DIFFICULTY_LEVEL = 3
 ENEMY_COUNTER = 0
@@ -390,6 +390,9 @@ class Rocket01(pygame.sprite.Sprite):
 		self.rect = self.image.get_rect()
 		self.rect.center = [x_pos, y_pos]
 		
+		self.collided = 0
+		self.lose_steps = 0
+		
 		self.channel_0 = pygame.mixer.Channel(5)
 		
 		self.sound_exp = pygame.mixer.Sound("sfx/r_exp.wav")
@@ -408,7 +411,7 @@ class Rocket01(pygame.sprite.Sprite):
 		bullet5 = Shrapnel01(self.rect.centerx, self.rect.centery,  -4, -4)
 		bullet6 = Shrapnel01(self.rect.centerx, self.rect.centery,  -6, 0)
 		bullet7 = Shrapnel01(self.rect.centerx, self.rect.centery,  4, -4)
-		
+			
 		bullet_group.add(bullet0)
 		bullet_group.add(bullet1)
 		bullet_group.add(bullet2)
@@ -417,6 +420,9 @@ class Rocket01(pygame.sprite.Sprite):
 		bullet_group.add(bullet5)
 		bullet_group.add(bullet6)
 		bullet_group.add(bullet7)
+		self.kill()
+		
+
 		
 		
 	def update(self):
@@ -429,10 +435,18 @@ class Rocket01(pygame.sprite.Sprite):
 			self.rect.y -= self.y_vel
 		else:
 			self.rect.y = 5
-		
-		if self.rect.bottom < 30 or pygame.sprite.spritecollide(self, enemies_group, False):
+			
+		if self.collided == 1:
 			self.explode()
-			self.kill()
+		
+		if self.rect.bottom < 30:
+			self.collided = 1
+			
+		if pygame.sprite.spritecollide(self, enemies_group, False):
+			self.rect.y += self.y_vel
+			self.y_vel = 0
+			self.explode()
+			
 
 class GreenBoxUiElement(pygame.sprite.Sprite):
 	def __init__(self, x_pos, y_pos):
@@ -680,7 +694,7 @@ class Pigeon02(pygame.sprite.Sprite):
 		self.rect = self.image.get_rect()
 		self.rect.center = [x_pos, y_pos]
 
-		self.last_shot = pygame.time.get_ticks() * randint(0, 5)
+		self.last_shot = pygame.time.get_ticks()
 
 		global ENEMY_COUNTER			#zliczanie przeciwnikow
 		ENEMY_COUNTER += 1
@@ -690,7 +704,7 @@ class Pigeon02(pygame.sprite.Sprite):
 		self.hp = 2
 		self.x_vel = 4				#musi byc Int !!! inaczej sie jebie
 		self.y_vel = 4				#oraz parzyste
-		self.cooldown = 1000		#miliseconds
+		self.cooldown = 300		#miliseconds
 
 	def update(self):
 		if self.move_sequence == 0:	#sekwencja ruchu po planie oktagonu
@@ -750,8 +764,9 @@ class Pigeon02(pygame.sprite.Sprite):
 		time_now = pygame.time.get_ticks()
 		
 		if time_now - self.last_shot > self.cooldown:
-			bullet = Enemy_Bullet01(self.rect.centerx, self.rect.bottom, 4, 1)
-			enemy_bullet_group.add(bullet)
+			if randint(0, 1) == 0:
+				bullet = Enemy_Bullet01(self.rect.centerx, self.rect.bottom, 4, 1)
+				enemy_bullet_group.add(bullet)
 			self.last_shot = time_now
 		
 		if pygame.sprite.spritecollide(self, bullet_group, True):
