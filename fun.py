@@ -211,13 +211,13 @@ class Shield01(pygame.sprite.Sprite):
 
 	def update(self):
 		key = pygame.key.get_pressed()
-		if key[pygame.K_LEFT] and self.rect.left > 0:
+		if key[pygame.K_LEFT] and self.rect.left > -10:
 			self.rect.x -= self.vel
-		if key[pygame.K_RIGHT] and self.rect.right < SCREEN_SIZE[0]:
+		if key[pygame.K_RIGHT] and self.rect.right < SCREEN_SIZE[0] + 5:
 			self.rect.x += self.vel
-		if key[pygame.K_UP] and self.rect.top > 0:
+		if key[pygame.K_UP] and self.rect.top > -10:
 			self.rect.y -= self.vel
-		if key[pygame.K_DOWN] and self.rect.bottom < SCREEN_SIZE[1] :
+		if key[pygame.K_DOWN] and self.rect.bottom < SCREEN_SIZE[1] + 10 :
 			self.rect.y += self.vel
 	
 		if pygame.sprite.spritecollide(self, enemy_bullet_group, True):
