@@ -204,7 +204,7 @@ while GAME_RUNNING:
 			GAME_RUNNING = False
 		if event.type == pygame.MOUSEBUTTONDOWN and STATE_MENU:
 			STATE_MENU = False
-			fun.channel_7.get_sound().set_volume(0.3)
+			fun.channel_7.get_sound().stop()
 			
 	
 	if STATE_MENU:
