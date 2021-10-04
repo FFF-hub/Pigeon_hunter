@@ -2,6 +2,7 @@ import pygame
 import fun
 from pygame.locals import *
 from random import randint
+from random import random
 #import fun
 
 # CONSTANTS
@@ -9,7 +10,9 @@ from random import randint
 
 # INIT VARS
 SCREEN_SIZE = fun.SCREEN_SIZE
-
+STATE_MENU = True
+MUSIC = True
+menu_music = pygame.mixer.Sound("sfx/s1.wav")
 
 # init
 #pygame.init()
@@ -30,6 +33,8 @@ tick_counter_60 = 0
 
 # background
 background = pygame.image.load('vis/stars_1.png').convert()
+
+
 
 # classes
 # space ship
@@ -59,6 +64,79 @@ def create_level(enemies, arrangement):
 		
 def level_complete_screen(enemies_killed, score, hp):
 	fucking_somethink = 1
+
+class StartingMenu():
+	def __init__(self):
+		self.start_menu_background = pygame.image.load('vis/start_menu_bcg.png').convert()
+		self.star_menu_im_0 = pygame.image.load('vis/startmenu.png').convert_alpha()
+		self.star_menu_im_1 = pygame.image.load('vis/startmenu_button.png').convert_alpha()
+		self.star_menu_im_2 = pygame.image.load('vis/startmenu_wheel.png').convert_alpha()
+
+		self.menu_seq = 0
+		self.menu_x = -25
+		self.menu_y = -25
+		self.menu_steps = 10
+		self.menu_c_step = 0
+
+	def CockpitAnimation(self):
+		if self.menu_seq == 0:
+			self.menu_x += 0.25
+			self.menu_c_step += 1
+			if self.menu_c_step >= self.menu_steps:
+				self.menu_c_step = 0
+				self.menu_seq = 1
+		elif self.menu_seq == 1:
+			self.menu_x -= 0.25
+			self.menu_c_step += 1
+			if self.menu_c_step >= self.menu_steps:
+				self.menu_c_step = 0
+				self.menu_seq = 0
+SMenu = StartingMenu()
+
+class Star():
+	def __init__(self):
+		global SCREEN_SIZE
+		self.x = fun.SCREEN_SIZE[0]/2
+		self.y = fun.SCREEN_SIZE[1]/2
+		self.y_vel = random()
+		self.x_vel = random()
+		self.radius = randint(1, 7)
+		self.dir = randint(0, 3)
+		self.alpha = 0
+		
+		if self.dir == 0:
+			self.y_vel *= -randint(1, 10)
+			self.x_vel *= -randint(1, 10)
+		elif self.dir == 1:
+			self.y_vel *= randint(1, 10)
+			self.x_vel *= -randint(1, 10)
+		elif self.dir == 2:
+			self.y_vel *= randint(1, 10)
+			self.x_vel *= randint(1, 10)
+		elif self.dir == 3:
+			self.y_vel *= -randint(1, 10)
+			self.x_vel *= randint(1, 10)
+			
+	def update(self, killtime):
+		global screen2
+		pygame.draw.circle(fun.screen2, (self.alpha, self.alpha, self.alpha), (self.x, self.y), self.radius)
+		if self.alpha < 255:
+			self.alpha += 1
+		self.x += self.x_vel
+		self.y += self.y_vel
+		if self.x > fun.SCREEN_SIZE[0] or self.x < 0 or self.y > fun.SCREEN_SIZE[1] or self.y < 0:
+			self.x = fun.SCREEN_SIZE[0]/2
+			self.y = fun.SCREEN_SIZE[1]/2
+			self.alpha = 64
+		if killtime:
+			self.kill()
+Stars = [Star()]
+for each in range(50):
+	Stars.append(Star())
+			
+			
+			
+			
 
 # Levels and player init
 player = fun.Players[0]
@@ -124,26 +202,34 @@ while GAME_RUNNING:
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT:
 			GAME_RUNNING = False
-
-    # player update
-	player_data = player.extract_data()
-	fun.player_group.update()
+		if event.type == pygame.MOUSEBUTTONDOWN and STATE_MENU:
+			STATE_MENU = False
+			fun.channel_7.get_sound().set_volume(0.3)
+			
 	
-	# UI update
-	fun.ui.check_player(player_data)
-	fun.ui_group.update()
-	fun.hp_group.update()
+	if STATE_MENU:
+		SMenu.CockpitAnimation()
+		
+	else:
+		# player update
+		player_data = player.extract_data()
+		fun.player_group.update()
+		
+		# UI update
+		fun.ui.check_player(player_data)
+		fun.ui_group.update()
+		fun.hp_group.update()
 
-    # Bullet01s update
-	fun.bullet_group.update()
-	fun.rocket_group.update()
-	fun.laser_group.update()
+		# Bullet01s update
+		fun.bullet_group.update()
+		fun.rocket_group.update()
+		fun.laser_group.update()
 
-    # Enemies update
-	fun.enemies_group.update()
-	
-	# Enemy bullet groups update
-	fun.enemy_bullet_group.update()
+		# Enemies update
+		fun.enemies_group.update()
+		
+		# Enemy bullet groups update
+		fun.enemy_bullet_group.update()
     
     # level end condition
 	if fun.ENEMY_COUNTER <= 0:
@@ -185,24 +271,41 @@ while GAME_RUNNING:
     # -----------------
 
 # update
-    #background
-	fun.screen.blit(background, (0, 0))
-
-    # player & bullets
-	fun.player_group.draw(fun.screen)
-	fun.bullet_group.draw(fun.screen)
-	fun.rocket_group.draw(fun.screen)
-	fun.laser_group.draw(fun.screen)
-    # enemies
-	fun.enemies_group.draw(fun.screen)
-	fun.enemy_bullet_group.draw(fun.screen)
-	# UI
-	fun.ui_group.draw(fun.screen)
-	fun.hp_group.draw(fun.screen)
-	fun.screen.blit(fun.TEXT_SCORE, fun.TEXT_SCORE_XY)
-	fun.screen.blit(fun.TEXT_COOLDOWNS, fun.TEXT_COOLDOWNS_XY)
-	fun.screen.blit(fun.TEXT_COOLDOWNS_VAL, fun.TEXT_COOLDOWNS_VAL_XY)
-    # draw
+    
+	
+	if STATE_MENU:
+		#background
+		if MUSIC:
+			fun.channel_7.play(menu_music, 50)
+			MUSIC = False
+		
+		fun.screen.blit(SMenu.start_menu_background, (0, 0))
+		for each in Stars:
+			each.update(not STATE_MENU)
+		fun.screen.blit(SMenu.star_menu_im_0, (SMenu.menu_x, SMenu.menu_y))
+		fun.screen.blit(SMenu.star_menu_im_2, (0, 0))
+		fun.screen.blit(SMenu.star_menu_im_1, (-1 * SMenu.menu_x/2, -1 * SMenu.menu_y/2))
+		TEXT_START = fun.font3.render("BEGIN", False, (0, 0, 0))
+		fun.screen.blit(TEXT_START, (770 + -1 * SMenu.menu_x/2, 525 + -1 * SMenu.menu_y/2))
+		
+	else:
+		#background
+		fun.screen.blit(background, (0, 0))
+		# player & bullets
+		fun.player_group.draw(fun.screen)
+		fun.bullet_group.draw(fun.screen)
+		fun.rocket_group.draw(fun.screen)
+		fun.laser_group.draw(fun.screen)
+		# enemies
+		fun.enemies_group.draw(fun.screen)
+		fun.enemy_bullet_group.draw(fun.screen)
+		# UI
+		fun.ui_group.draw(fun.screen)
+		fun.hp_group.draw(fun.screen)
+		fun.screen.blit(fun.TEXT_SCORE, fun.TEXT_SCORE_XY)
+		fun.screen.blit(fun.TEXT_COOLDOWNS, fun.TEXT_COOLDOWNS_XY)
+		fun.screen.blit(fun.TEXT_COOLDOWNS_VAL, fun.TEXT_COOLDOWNS_VAL_XY)
+		# draw
 	pygame.display.update()
 
 
