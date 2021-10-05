@@ -32,7 +32,7 @@ channel_7 = pygame.mixer.Channel(7)
 #variables
 AI_SC_SIZE = (SCREEN_SIZE[0]//10, SCREEN_SIZE[0]//10)
 
-COOLDOWNS = [300, 1 * 1000, 1 * 1000, 1 * 1000]
+COOLDOWNS = [400, 6 * 1000, 9 * 1000, 30 * 1000]
 
 DIFFICULTY_LEVEL = 3
 ENEMY_COUNTER = 0
@@ -209,7 +209,7 @@ class Shield01(pygame.sprite.Sprite):
 		self.rect = self.image.get_rect()
 		self.rect.center = [x_pos, y_pos]
 		
-		self.hp = 3
+		self.hp = 1
 		self.vel = 5
 
 	def update(self):
@@ -421,10 +421,7 @@ class Rocket01(pygame.sprite.Sprite):
 		bullet_group.add(bullet6)
 		bullet_group.add(bullet7)
 		self.kill()
-		
-
-		
-		
+	
 	def update(self):
 		if self.y_vel < self.y_vel_max:
 			self.y_vel += 1
@@ -436,11 +433,8 @@ class Rocket01(pygame.sprite.Sprite):
 		else:
 			self.rect.y = 5
 			
-		if self.collided == 1:
-			self.explode()
-		
 		if self.rect.bottom < 30:
-			self.collided = 1
+			self.kill()
 			
 		if pygame.sprite.spritecollide(self, enemies_group, False):
 			self.rect.y += self.y_vel
