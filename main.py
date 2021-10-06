@@ -10,7 +10,7 @@ from random import random
 
 # INIT VARS
 SCREEN_SIZE = fun.SCREEN_SIZE
-STATE_MENU = True
+STATE_MENU = False
 MUSIC = True
 menu_music = pygame.mixer.Sound("sfx/s1.wav")
 
@@ -41,11 +41,11 @@ background = pygame.image.load('vis/stars_1.png').convert()
 
 
 #enemy creator
-def create_enemies(enemy_type, rows, cols, x_dis, y_dis, x_buf, y_buf):
+def create_enemies(enemy_type, rows, cols, x_dis, y_dis, x_buf, y_buf, altbeh):
 	# x_buf/y_buf - odpowiadaja za odstep od krawedzi ekranu (x/y)
     for row in range(rows):
         for item in range(cols):
-            enemy = enemy_type(x_buf + item * x_dis, y_buf + row * y_dis)
+            enemy = enemy_type(x_buf + item * x_dis, y_buf + row * y_dis, altbeh)
             fun.enemies_group.add(enemy)
 
 #level creator function
@@ -60,7 +60,8 @@ def create_level(enemies, arrangement):
 					   arrangement[current_position][2],
 					   arrangement[current_position][3],
 					   arrangement[current_position][4],
-					   arrangement[current_position][5])
+					   arrangement[current_position][5],
+					   arrangement[current_position][6])
 		
 def level_complete_screen(enemies_killed, score, hp):
 	fucking_somethink = 1
@@ -134,52 +135,96 @@ Stars = [Star()]
 for each in range(50):
 	Stars.append(Star())
 			
-			
-			
-			
-
 # Levels and player init
 player = fun.Players[0]
 fun.player_group.add(player)
 
-
 #create enemies
+# episode one maps
 level_00_enemies = [fun.Pigeon01]
-level_00_geo = [[4, 6, 120, 80, 300, 100]]
+level_00_geo = [[4, 6, 120, 80, 300, 100, False]]
 
 level_01_enemies = [fun.Pigeon01, fun.Pigeon01]
-level_01_geo = [[5, 5, 60, 40, 200, 100],
-				[5, 5, 60, 40, 700, 100]]
+level_01_geo = [[5, 5, 60, 40, 200, 100, False],
+				[5, 5, 60, 40, 700, 100, False]]
 				
 level_02_enemies = [fun.Pigeon01, fun.Pigeon01,
 					fun.Pigeon02]
-level_02_geo = [[5, 5, 60, 40, 270, 100],
-				[5, 5, 60, 40, 690, 100],
-				[1, 1, 0, 0, 550, 200]]
+level_02_geo = [[5, 5, 60, 40, 270, 100, False],
+				[5, 5, 60, 40, 690, 100, False],
+				[1, 1, 0, 0, 550, 200, False]]
 				
 level_03_enemies = [fun.Pigeon01, fun.Pigeon02,
 					fun.Pigeon03]
-level_03_geo = [[2, 16, 40, 40, 300, 100],
-				[1, 2, 240, 120, 475, 100],
-				[1, 2, 300, 120, 430, 50]]
+level_03_geo = [[2, 16, 40, 40, 300, 100, False],
+				[1, 2, 240, 120, 475, 100, False],
+				[1, 2, 300, 120, 430, 50, False]]
 				
 level_04_enemies = [fun.Pigeon02, fun.Pigeon03]
-level_04_geo = [[1, 3, 240, 120, 335, 150],
-				[1, 7, 100, 120, 240, 50]]
+level_04_geo = [[1, 3, 240, 120, 335, 150, False],
+				[1, 7, 100, 120, 240, 50, False]]
 				
 level_05_enemies = [fun.Pigeon04]
-level_05_geo = [[1, 5, 50, 50, 300, 150]]
+level_05_geo = [[1, 5, 50, 50, 300, 150, False]]
 
 level_06_enemies = [fun.Pigeon01, fun.Pigeon02,
 					fun.Pigeon03, fun.Pigeon04]
-level_06_geo = [[2, 16, 40, 40, 300, 100],
-				[1, 3, 240, 120, 335, 150],
-				[1, 2, 300, 120, 430, 50],
-				[1, 3, 50, 50, 300, 150]]
+level_06_geo = [[2, 16, 40, 40, 300, 100, False],
+				[1, 3, 240, 120, 335, 150, False],
+				[1, 2, 300, 120, 430, 50, False],
+				[1, 3, 50, 50, 300, 150, False]]
 				
 level_07_enemies = [fun.Boss01, fun.Pigeon04]
-level_07_geo = [[1, 1, 0, 0, 200, 150],
-				[2, 1, 40, 40, 300, 100]]
+level_07_geo = [[1, 1, 0, 0, 200, 150, False],
+				[2, 1, 40, 40, 300, 100, False]]
+
+#episode 2 maps
+level_10_enemies = [fun.Pigeon01]
+level_10_geo = [[8, 12, 60, 40, 175, 100, False]]
+
+level_11_enemies = [fun.Pigeon01, fun.Pigeon02]
+level_11_geo = [[4, 12, 60, 40, 175, 200, False],
+				[1, 6, 120, 40, 275, 100, False]]
+				
+level_12_enemies = [fun.Pigeon01, fun.Pigeon01,
+					fun.Pigeon03]
+level_12_geo = [[2, 12, 60, 40, 175, 300, False],
+				[1, 12, 60, 40, 175, 100, False],
+				[1, 4, 120, 0, 425, 200, False]]
+				
+level_13_enemies = [fun.Pigeon01, fun.Pigeon02,
+					fun.Pigeon03]
+level_13_geo = [[2, 16, 40, 40, 200, 100, False],
+				[1, 4, 240, 120, 215, 100, False],
+				[1, 4, 240, 120, 190, 50, False]]
+				
+level_14_enemies = [fun.Pigeon01, fun.Pigeon01,
+					fun.Pigeon02, fun.Pigeon02,
+					fun.Pigeon03, fun.Pigeon03,
+					fun.Pigeon04]
+level_14_geo = [[1, 7, 40, 120, 175, 200, False],
+				[1, 7, 40, 120, 575, 200, False],
+				[1, 3, 40, 120, 250, 100, False],
+				[1, 3, 40, 120, 800, 100, False],
+				[1, 2, 80, 120, 320, 50, False],
+				[1, 2, 80, 120, 720, 50, False],
+				[1, 2, 80, 120, 720, 50, False]]
+				
+level_15_enemies = [fun.Pigeon01, fun.Pigeon04]
+level_15_geo = [[2, 20, 40, 40, 125, 200, False],
+				[1, 8, 40, 40, 300, 200, False]]
+
+level_16_enemies = [fun.Pigeon02, fun.Pigeon03,
+					fun.Pigeon04]
+level_16_geo = [[1, 6, 100, 40, 330, 100, False],
+				[1, 5, 200, 120, 150, 150, False],
+				[1, 4, 300, 120, 300, 50, False]]
+				
+level_17_enemies = [fun.Boss01, fun.Boss01,
+					fun.Pigeon04]
+level_17_geo = [[1, 1, 0, 0, 200, 200, False],
+				[1, 1, 0, 0, 1000, 100, True],
+				[1, 8, 150, 0, 100, 50, False]]
 
 level_map = [[level_00_enemies, level_00_geo],
 			 [level_01_enemies, level_01_geo],
@@ -188,7 +233,17 @@ level_map = [[level_00_enemies, level_00_geo],
 			 [level_04_enemies, level_04_geo],
 			 [level_05_enemies, level_05_geo],
 			 [level_06_enemies, level_06_geo],
-			 [level_07_enemies, level_07_geo]]
+			 [level_07_enemies, level_07_geo],
+
+			 [level_10_enemies, level_10_geo],
+			 [level_11_enemies, level_11_geo],
+			 [level_12_enemies, level_12_geo],
+			 [level_13_enemies, level_13_geo],
+			 [level_14_enemies, level_14_geo],
+			 [level_15_enemies, level_15_geo],
+			 [level_16_enemies, level_16_geo],
+			 [level_17_enemies, level_17_geo]]
+			 
 			 
 MAX_LEVEL = len(level_map) - 1
 
