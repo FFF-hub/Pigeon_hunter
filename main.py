@@ -10,7 +10,7 @@ from random import random
 
 # INIT VARS
 SCREEN_SIZE = fun.SCREEN_SIZE
-STATE_MENU = False
+STATE_MENU = True
 MUSIC = True
 menu_music = pygame.mixer.Sound("sfx/s1.wav")
 
