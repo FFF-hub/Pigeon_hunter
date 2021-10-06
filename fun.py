@@ -647,42 +647,58 @@ class Enemy_Bullet02(pygame.sprite.Sprite):
 #Pigeons
 #Default common enemy
 class Pigeon01(pygame.sprite.Sprite):
-    def __init__(self, x_pos, y_pos):
-        pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load('vis/pigeon_01.png').convert_alpha()
-        self.rect = self.image.get_rect()
-        self.rect.center = [x_pos, y_pos]
+	def __init__(self, x_pos, y_pos, altbeh):
+		pygame.sprite.Sprite.__init__(self)
+		self.image = pygame.image.load('vis/pigeon_01.png').convert_alpha()
+		self.rect = self.image.get_rect()
+		self.rect.center = [x_pos, y_pos]
 
-        global ENEMY_COUNTER			#zliczanie przeciwnikow
-        ENEMY_COUNTER += 1
-        self.move_steps = 100
-        self.move_counter = 0		#aka licznik krokow golembia
-        self.move_direction = 1
-        self.hp = 1
-        self.x_vel = 2				#musi byc Int !!! inaczej sie jebie
-        self.y_step = 5			#liczba pikseli kroku w dol
+		global ENEMY_COUNTER			#zliczanie przeciwnikow
+		ENEMY_COUNTER += 1
+		self.move_counter = 0		#aka licznik krokow golembia
+		self.hp = 1
+		self.x_vel = 2				#musi byc Int !!! inaczej sie jebie
+		self.y_step = 5			#liczba pikseli kroku w dol
+		
+		if not altbeh:
+			self.move_steps = 200
+			self.move_direction = 1
+			self.move_seq = 0
+		else:
+			self.move_steps = 200
+			self.move_direction = 1
+			self.move_seq = 1	
 
-    def update(self):
-        self.rect.x += self.x_vel * self.move_direction
-        self.move_counter += self.x_vel
-        global SCREEN_SIZE
-        if abs(self.move_counter) > self.move_steps:
-            self.move_direction *= -1
-            self.move_counter *= self.move_direction
-            self.rect.y += self.y_step
-        if pygame.sprite.spritecollide(self, bullet_group, True) or self.rect.y > SCREEN_SIZE[1]:
-            self.hp -= 1
-        if pygame.sprite.spritecollide(self, laser_group, False):
-            self.hp -= 2    
-        if self.hp <= 0:
-            self.kill()
-            global ENEMY_COUNTER, SCORE
-            ENEMY_COUNTER -= 1
-            SCORE += 1
+	def update(self):
+		#move sequence
+		if self.move_seq == 0:
+			self.rect.x += self.x_vel
+			self.move_counter += self.x_vel
+			if self.move_counter >= self.move_steps:
+				self.move_counter = 0
+				self.move_seq = 1
+				self.rect.y += self.y_step
+		elif self.move_seq == 1:
+			self.rect.x -= self.x_vel
+			self.move_counter += self.x_vel
+			if self.move_counter >= self.move_steps:
+				self.move_counter = 0
+				self.move_seq = 0
+				self.rect.y += self.y_step #move one step down
+				
+		if pygame.sprite.spritecollide(self, bullet_group, True) or self.rect.y > SCREEN_SIZE[1]:
+			self.hp -= 1
+		if pygame.sprite.spritecollide(self, laser_group, False):
+			self.hp -= 2    
+		if self.hp <= 0:
+			self.kill()
+			global ENEMY_COUNTER, SCORE
+			ENEMY_COUNTER -= 1
+			SCORE += 1
 
 #UFO pigeon
 class Pigeon02(pygame.sprite.Sprite):
-	def __init__(self, x_pos, y_pos):
+	def __init__(self, x_pos, y_pos, altbeh):
 		pygame.sprite.Sprite.__init__(self)
 		self.image = pygame.image.load('vis/pigeon_02.png').convert_alpha()
 		self.rect = self.image.get_rect()
@@ -696,9 +712,15 @@ class Pigeon02(pygame.sprite.Sprite):
 		self.move_counter = 0		#aka licznik krokow obiektu
 		self.move_sequence = 0
 		self.hp = 2
-		self.x_vel = 4				#musi byc Int !!! inaczej sie jebie
-		self.y_vel = 4				#oraz parzyste
+
 		self.cooldown = 300		#miliseconds
+		
+		if not altbeh:
+			self.x_vel = 4				#musi byc Int !!! inaczej sie jebie
+			self.y_vel = 4				#oraz parzyste
+		else:
+			self.x_vel = -4
+			self.y_vel = -4
 
 	def update(self):
 		if self.move_sequence == 0:	#sekwencja ruchu po planie oktagonu
@@ -777,7 +799,7 @@ class Pigeon02(pygame.sprite.Sprite):
 
 #chonker pigeon
 class Pigeon03(pygame.sprite.Sprite):
-	def __init__(self, x_pos, y_pos):
+	def __init__(self, x_pos, y_pos, altbeh):
 		pygame.sprite.Sprite.__init__(self)
 		self.image = pygame.image.load('vis/pigeon_03.png').convert_alpha()
 		self.rect = self.image.get_rect()
@@ -790,15 +812,20 @@ class Pigeon03(pygame.sprite.Sprite):
 		self.move_steps = 100
 		self.move_steps_1 = 20
 		self.move_counter = 0		#aka licznik krokow obiektu
-		self.move_sequence = 0
 		self.move_counter_1 = 0
-		self.move_sequence_1 = 0
 		self.move_direction = 1
 		self.hp = 4
 		self.x_vel = 1				#musi byc Int !!! inaczej sie jebie
 		self.y_vel = 1
 		self.y_step = 5			#liczba pikseli kroku w dol
 		self.cooldown = 3000		#miliseconds
+		
+		if not altbeh:
+			self.move_sequence = 0
+			self.move_sequence_1 = 0
+		else:
+			self.move_sequence = 1
+			self.move_sequence_1 = 0
 
 	def update(self):
 		if self.move_sequence == 0:
@@ -850,7 +877,7 @@ class Pigeon03(pygame.sprite.Sprite):
 
 #black ops pigeon
 class Pigeon04(pygame.sprite.Sprite):
-	def __init__(self, x_pos, y_pos):
+	def __init__(self, x_pos, y_pos, altbeh):
 		pygame.sprite.Sprite.__init__(self)
 		self.image = pygame.image.load('vis/pigeon_04.png').convert_alpha()
 		self.rect = self.image.get_rect()
@@ -867,7 +894,7 @@ class Pigeon04(pygame.sprite.Sprite):
 		self.fire_sequence = 0
 		self.bullet_x_v = 0
 		self.bullet_y_v = 0
-		self.cooldown = 3000		#miliseconds
+		self.cooldown = randint(25, 35) * 100	#miliseconds
 		self.move_cooldown = 5000
 		self.fire_series_time = 100	
 
@@ -940,7 +967,7 @@ class Pigeon04(pygame.sprite.Sprite):
 
 #megachonker boss 1
 class Boss01(pygame.sprite.Sprite):
-	def __init__(self, x_pos, y_pos):
+	def __init__(self, x_pos, y_pos, altbeh):
 		pygame.sprite.Sprite.__init__(self)
 		self.image = pygame.image.load('vis/boss_01.png').convert_alpha()
 		self.rect = self.image.get_rect()
@@ -956,10 +983,8 @@ class Boss01(pygame.sprite.Sprite):
 		self.x_vel = 3	#musi byc Int !!! inaczej sie jebie
 		self.y_vel = 2
 		self.faze = 0
-		self.m_sequence_0 = 0
 		self.m_steps_0 = 800
 		self.m_counter = 0
-		self.m_sequence_1 = 0
 		self.m_steps_1 = 100
 		self.m_counter_v = 0
 		self.fire_sequence = 0
@@ -967,7 +992,14 @@ class Boss01(pygame.sprite.Sprite):
 		self.bullet_y_v = 0
 		self.cooldown = 1000		#miliseconds
 		self.move_cooldown = 5000
-		self.fire_series_time = 100	
+		self.fire_series_time = 100
+		
+		if not altbeh:
+			self.m_sequence_1 = 0
+			self.m_sequence_0 = 0
+		else:
+			self.m_sequence_1 = 0
+			self.m_sequence_0 = 1
 
 	def update(self):
 		#faze 1
