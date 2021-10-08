@@ -660,6 +660,9 @@ class Pigeon01(pygame.sprite.Sprite):
 		self.x_vel = 2				#musi byc Int !!! inaczej sie jebie
 		self.y_step = 5			#liczba pikseli kroku w dol
 		
+		self.sound_death = pygame.mixer.Sound("sfx/enemy_kill.wav")
+		self.sound_death.set_volume(0.1)
+		
 		if not altbeh:
 			self.move_steps = 200
 			self.move_direction = 1
@@ -692,6 +695,7 @@ class Pigeon01(pygame.sprite.Sprite):
 			self.hp -= 2    
 		if self.hp <= 0:
 			self.kill()
+			channel_6.play(self.sound_death)
 			global ENEMY_COUNTER, SCORE
 			ENEMY_COUNTER -= 1
 			SCORE += 1
@@ -705,7 +709,12 @@ class Pigeon02(pygame.sprite.Sprite):
 		self.rect.center = [x_pos, y_pos]
 
 		self.last_shot = pygame.time.get_ticks()
-
+		
+		self.sound_death = pygame.mixer.Sound("sfx/enemy_kill.wav")
+		self.sound_death.set_volume(0.1)
+		self.sound_laser = pygame.mixer.Sound("sfx/enemy_laser.wav")
+		self.sound_laser.set_volume(0.1)
+		
 		global ENEMY_COUNTER			#zliczanie przeciwnikow
 		ENEMY_COUNTER += 1
 		self.move_steps = 50
@@ -782,6 +791,7 @@ class Pigeon02(pygame.sprite.Sprite):
 		if time_now - self.last_shot > self.cooldown:
 			if randint(0, 1) == 0:
 				bullet = Enemy_Bullet01(self.rect.centerx, self.rect.bottom, 4, 1)
+				channel_4.play(self.sound_laser)
 				enemy_bullet_group.add(bullet)
 			self.last_shot = time_now
 		
@@ -793,6 +803,7 @@ class Pigeon02(pygame.sprite.Sprite):
 		
 		if self.hp <= 0:
 			self.kill()
+			channel_6.play(self.sound_death)
 			global ENEMY_COUNTER, SCORE
 			ENEMY_COUNTER -= 1
 			SCORE += 2
@@ -806,6 +817,11 @@ class Pigeon03(pygame.sprite.Sprite):
 		self.rect.center = [x_pos, y_pos]
 		
 		self.last_shot = pygame.time.get_ticks()
+		
+		self.sound_death = pygame.mixer.Sound("sfx/enemy_kill.wav")
+		self.sound_death.set_volume(0.1)
+		self.sound_egg = pygame.mixer.Sound("sfx/enemy_egg.wav")
+		self.sound_egg.set_volume(0.2)
 		
 		global ENEMY_COUNTER			#zliczanie przeciwnikow
 		ENEMY_COUNTER += 1
@@ -860,6 +876,7 @@ class Pigeon03(pygame.sprite.Sprite):
 		if time_now - self.last_shot > self.cooldown:
 			if randint(0, 1) == 0: 
 				bullet = Enemy_Egg01(self.rect.centerx, self.rect.bottom, 2, 0)
+				channel_7.play(self.sound_egg)
 				enemy_bullet_group.add(bullet)
 			self.last_shot = time_now
 		
@@ -871,6 +888,7 @@ class Pigeon03(pygame.sprite.Sprite):
 		
 		if self.hp <= 0:
 			self.kill()
+			channel_6.play(self.sound_death)
 			global ENEMY_COUNTER, SCORE
 			ENEMY_COUNTER -= 1
 			SCORE += 4
@@ -885,6 +903,11 @@ class Pigeon04(pygame.sprite.Sprite):
 		
 		self.last_shot = pygame.time.get_ticks()
 		self.last_change = pygame.time.get_ticks()
+		
+		self.sound_death = pygame.mixer.Sound("sfx/enemy_kill.wav")
+		self.sound_death.set_volume(0.1)
+		self.sound_ball = pygame.mixer.Sound("sfx/enemy_ball.wav")
+		self.sound_ball.set_volume(0.2)
 		
 		global ENEMY_COUNTER		#zliczanie przeciwnikow
 		ENEMY_COUNTER += 1
@@ -938,18 +961,21 @@ class Pigeon04(pygame.sprite.Sprite):
 			bullet01 = Enemy_Bullet02(self.rect.centerx, self.rect.centery,
 									self.bullet_y_v, self.bullet_x_v)
 			enemy_bullet_group.add(bullet01)
+			channel_3.play(self.sound_ball)
 			self.last_shot = time_now
 			self.fire_sequence = 2
 		elif self.fire_sequence == 2 and time_now - self.last_shot > self.fire_series_time:
 			bullet02 = Enemy_Bullet02(self.rect.centerx, self.rect.centery,
 									self.bullet_y_v, self.bullet_x_v)
 			enemy_bullet_group.add(bullet02)
+			channel_3.play(self.sound_ball)
 			self.last_shot = time_now
 			self.fire_sequence = 3
 		elif self.fire_sequence == 3 and time_now - self.last_shot > self.fire_series_time:
 			bullet03 = Enemy_Bullet02(self.rect.centerx, self.rect.centery,
 									self.bullet_y_v, self.bullet_x_v)						
 			enemy_bullet_group.add(bullet03)
+			channel_3.play(self.sound_ball)
 			self.last_shot = time_now
 			self.fire_sequence = 0
 		
@@ -961,6 +987,7 @@ class Pigeon04(pygame.sprite.Sprite):
 			
 		if self.hp <= 0:
 			self.kill()
+			channel_6.play(self.sound_death)
 			global ENEMY_COUNTER, SCORE
 			ENEMY_COUNTER -= 1
 			SCORE += 6
@@ -975,6 +1002,13 @@ class Boss01(pygame.sprite.Sprite):
 		
 		self.last_shot = pygame.time.get_ticks()
 		self.last_change = pygame.time.get_ticks()
+		
+		self.sound_death = pygame.mixer.Sound("sfx/enemy_kill.wav")
+		self.sound_death.set_volume(0.1)
+		self.sound_egg = pygame.mixer.Sound("sfx/enemy_egg.wav")
+		self.sound_egg.set_volume(0.2)
+		self.sound_ball = pygame.mixer.Sound("sfx/enemy_ball.wav")
+		self.sound_ball.set_volume(0.2)
 		
 		global ENEMY_COUNTER		#zliczanie przeciwnikow
 		ENEMY_COUNTER += 1
@@ -1046,30 +1080,35 @@ class Boss01(pygame.sprite.Sprite):
 				bullet01 = Enemy_Bullet02(self.rect.centerx, self.rect.centery,
 										self.bullet_y_v, self.bullet_x_v)
 				enemy_bullet_group.add(bullet01)
+				channel_3.play(self.sound_ball)
 				self.last_shot = time_now
 				self.fire_sequence = 2
 			elif self.fire_sequence == 2 and time_now - self.last_shot > self.fire_series_time:
 				bullet02 = Enemy_Bullet02(self.rect.centerx, self.rect.centery,
 										self.bullet_y_v, self.bullet_x_v)
 				enemy_bullet_group.add(bullet02)
+				channel_3.play(self.sound_ball)
 				self.last_shot = time_now
 				self.fire_sequence = 3
 			elif self.fire_sequence == 3 and time_now - self.last_shot > self.fire_series_time:
 				bullet03 = Enemy_Bullet02(self.rect.centerx, self.rect.centery,
 										self.bullet_y_v, self.bullet_x_v)						
 				enemy_bullet_group.add(bullet03)
+				channel_3.play(self.sound_ball)
 				self.last_shot = time_now
 				self.fire_sequence = 4
 			elif self.fire_sequence == 4 and time_now - self.last_shot > self.fire_series_time:
 				bullet04 = Enemy_Bullet02(self.rect.centerx, self.rect.centery,
 										self.bullet_y_v, self.bullet_x_v)						
 				enemy_bullet_group.add(bullet04)
+				channel_3.play(self.sound_ball)
 				self.last_shot = time_now
 				self.fire_sequence = 5
 			elif self.fire_sequence == 5 and time_now - self.last_shot > self.fire_series_time:
 				bullet05 = Enemy_Bullet02(self.rect.centerx, self.rect.centery,
 										self.bullet_y_v, self.bullet_x_v)						
 				enemy_bullet_group.add(bullet05)
+				channel_3.play(self.sound_ball)
 				self.last_shot = time_now
 				self.fire_sequence = 0
 		elif self.faze == 1:
@@ -1083,6 +1122,7 @@ class Boss01(pygame.sprite.Sprite):
 				bullet10 = Enemy_Egg01(self.rect.centerx + 20, self.rect.centery + 45,
 										4, 0)
 				enemy_bullet_group.add(bullet01, bullet10)
+				channel_7.play(self.sound_egg)
 				self.last_shot = time_now
 				self.fire_sequence = 2
 			elif self.fire_sequence == 2 and time_now - self.last_shot > self.fire_series_time:
@@ -1091,6 +1131,7 @@ class Boss01(pygame.sprite.Sprite):
 				bullet20 = Enemy_Egg01(self.rect.centerx + 20, self.rect.centery + 45,
 										3, 0)
 				enemy_bullet_group.add(bullet02, bullet20)
+				channel_7.play(self.sound_egg)
 				self.last_shot = time_now
 				self.fire_sequence = 3
 			elif self.fire_sequence == 3 and time_now - self.last_shot > self.fire_series_time:
@@ -1099,6 +1140,7 @@ class Boss01(pygame.sprite.Sprite):
 				bullet30 = Enemy_Egg01(self.rect.centerx + 20, self.rect.centery + 45,
 										2, 0)
 				enemy_bullet_group.add(bullet03, bullet30)
+				channel_7.play(self.sound_egg)
 				self.last_shot = time_now
 				self.fire_sequence = 0
 			
@@ -1111,6 +1153,7 @@ class Boss01(pygame.sprite.Sprite):
 			
 		if self.hp <= 0:
 			self.kill()
+			channel_6.play(self.sound_death)
 			global ENEMY_COUNTER, SCORE
 			ENEMY_COUNTER -= 1
 			SCORE += 6
