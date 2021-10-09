@@ -289,8 +289,8 @@ while GAME_RUNNING:
     # level end condition
 	if fun.ENEMY_COUNTER <= 0:
 		NEXT_LEVEL = True
-		print("CONGRATULATIONS: you have completed first encounter!")
-		print("fun.SCORE: ", fun.SCORE)
+		print("GOOD JOB PILOT!")
+		print("Points: ", fun.SCORE)
 		fun.bullet_group.empty()
 		fun.rocket_group.empty()
 		fun.enemies_group.empty()
@@ -307,7 +307,7 @@ while GAME_RUNNING:
 			print("CONGRATULATIONS YOU HAVE SAVED THE GALAXY")
 	
 	if NEXT_LEVEL:
-		print("COMMING UP! LEVEL: ", CURRENT_LEVEL)
+		#print("COMMING UP! LEVEL: ", CURRENT_LEVEL)
 		create_level(level_map[CURRENT_LEVEL][0],
 					level_map[CURRENT_LEVEL][1])
 		NEXT_LEVEL = False
@@ -316,12 +316,12 @@ while GAME_RUNNING:
 
     # game clock stuff
 	game_clock.tick(58)
-	if tick_counter_60 < 60:
-		tick_counter_60 += 1
-	else:
-		print(game_clock.get_fps())
-		print("pozostalo: ", fun.ENEMY_COUNTER, " SCORE: ", fun.SCORE)
-		tick_counter_60 = 0
+	#if tick_counter_60 < 60:
+	#	tick_counter_60 += 1
+	#else:
+	#	print(game_clock.get_fps())
+	#	print("pozostalo: ", fun.ENEMY_COUNTER, " SCORE: ", fun.SCORE)
+	#	tick_counter_60 = 0
         
     # -----------------
 
